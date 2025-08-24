@@ -39,7 +39,7 @@ end
 Start = tick()
 Heartbeat:Connect(HeartbeatUpdate)
 game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM脚本"; Text ="欢迎使用!此脚本为半缝合"; Duration = 2; })
-game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM"; Text ="发布时间:25/8/21,当前版本为1.0"; Duration = 4; })
+game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM"; Text ="发布时间:25/8/24,当前版本为1.0"; Duration = 4; })
 
 local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/CNFXM/FXM/main/FXMUI.lua"))();        
 local win = ui:new("FXM脚本")
@@ -49,8 +49,8 @@ local UITab1 = win:Tab("信息公告",'117404188324801')
 local about = UITab1:section("更新公告",false)
 
 about:Label("发布时间2025/8/20")
-about:Label("当前版本:1.0")
-about:Label("更新：巴掌，传送")
+about:Label("当前版本:1.1")
+about:Label("更新：巴掌，FE，触碰范围，旋转，指令，黑客功能")
 about:Label("公告：作者老开心了,成功的当上了素辞的徒弟🤓")
 about:Label("算了后面的课慢慢补🤓👍")
 about:Label("作者不忘初心，永久免费脚本")
@@ -88,6 +88,10 @@ about:Toggle("脚本框架变小一点", "", false, function(state)
 
 about:Button("玩家加入游戏提示",function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/boyscp/scriscriptsc/main/bbn.lua"))()
+end)
+
+about:Button("退出游戏",function()
+game.Players.LocalPlayer:Kick("你已被FXM脚本退出服务器，这不是封号!")
 end)
 
 about:Button("关闭脚本",function()
@@ -455,6 +459,10 @@ about:Button("FXM传送",function()
 loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMdeliver.lua'))()
 end)
 
+about:Button("FXM黑洞",function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMheidong.lua'))()
+end)
+
 about:Button("FXM飞行",function()
 loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMFLYV3.lua'))()
 end)
@@ -758,7 +766,7 @@ about:Button("屏幕准星",function()
 local fov = 0 local RunService = game:GetService("RunService") local UserInputService = game:GetService("UserInputService") local Players = game:GetService("Players") local Cam = game.Workspace.CurrentCamera local FOVring = Drawing.new("Circle") FOVring.Visible = true FOVring.Thickness = 2 FOVring.Color = Color3.fromRGB(231, 231, 236) FOVring.Filled = false FOVring.Radius = fov FOVring.Position = Cam.ViewportSize / 2 local function updateDrawings() local camViewportSize = Cam.ViewportSize FOVring.Position = camViewportSize / 2 end local function onKeyDown(input) if input.KeyCode == Enum.KeyCode.Delete then RunService:UnbindFromRenderStep("FOVUpdate") FOVring:Remove() end end UserInputService.InputBegan:Connect(onKeyDown) local function lookAt(target) local lookVector = (target - Cam.CFrame.Position).unit local newCFrame = CFrame.new(Cam.CFrame.Position, Cam.CFrame.Position + lookVector) Cam.CFrame = newCFrame end local function getClosestPlayerInFOV(trg_part) local nearest = nil local last = math.huge local playerMousePos = Cam.ViewportSize / 2 for _, player in ipairs(Players:GetPlayers()) do if player ~= Players.LocalPlayer then local part = player.Character and player.Character:FindFirstChild(trg_part) if part then local ePos, isVisible = Cam:WorldToViewportPoint(part.Position) local distance = (Vector2.new(ePos.x, ePos.y) - playerMousePos).Magnitude if distance < last and isVisible and distance < fov then last = distance nearest = player end end end end return nearest end RunService.RenderStepped:Connect(function() updateDrawings() local closest = getClosestPlayerInFOV("Head") if closest and closest.Character:FindFirstChild("Head") then lookAt(closest.Character.Head.Position) end end)
 end)
 
-about:Button("情云同款自瞄可调", function()
+about:Button("自瞄可调", function()
   local fov = 100 local smoothness = 10 local crosshairDistance = 5 local RunService = game:GetService("RunService") local UserInputService = game:GetService("UserInputService") local Players = game:GetService("Players") local Cam = game.Workspace.CurrentCamera local FOVring = Drawing.new("Circle") FOVring.Visible = true FOVring.Thickness = 2 FOVring.Color = Color3.fromRGB(0, 255, 0) FOVring.Filled = false FOVring.Radius = fov FOVring.Position = Cam.ViewportSize / 2 local Player = Players.LocalPlayer local PlayerGui = Player:WaitForChild("PlayerGui") local ScreenGui = Instance.new("ScreenGui") ScreenGui.Name = "FovAdjustGui" ScreenGui.Parent = PlayerGui local Frame = Instance.new("Frame") Frame.Name = "MainFrame" Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) Frame.BorderColor3 = Color3.fromRGB(128, 0, 128) Frame.BorderSizePixel = 2 Frame.Position = UDim2.new(0.3, 0, 0.3, 0) Frame.Size = UDim2.new(0.4, 0, 0.4, 0) Frame.Active = true Frame.Draggable = true Frame.Parent = ScreenGui local MinimizeButton = Instance.new("TextButton") MinimizeButton.Name = "MinimizeButton" MinimizeButton.Text = "-" MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255) MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) MinimizeButton.Position = UDim2.new(0.9, 0, 0, 0) MinimizeButton.Size = UDim2.new(0.1, 0, 0.1, 0) MinimizeButton.Parent = Frame local isMinimized = false MinimizeButton.MouseButton1Click:Connect(function() isMinimized = not isMinimized if isMinimized then Frame:TweenSize(UDim2.new(0.1, 0, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true) MinimizeButton.Text = "+" else Frame:TweenSize(UDim2.new(0.4, 0, 0.4, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true) MinimizeButton.Text = "-" end end) local FovLabel = Instance.new("TextLabel") FovLabel.Name = "FovLabel" FovLabel.Text = "自瞄范围" FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255) FovLabel.BackgroundTransparency = 1 FovLabel.Position = UDim2.new(0.1, 0, 0.1, 0) FovLabel.Size = UDim2.new(0.8, 0, 0.2, 0) FovLabel.Parent = Frame local FovSlider = Instance.new("TextBox") FovSlider.Name = "FovSlider" FovSlider.Text = tostring(fov) FovSlider.TextColor3 = Color3.fromRGB(255, 255, 255) FovSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50) FovSlider.Position = UDim2.new(0.1, 0, 0.3, 0) FovSlider.Size = UDim2.new(0.8, 0, 0.2, 0) FovSlider.Parent = Frame local SmoothnessLabel = Instance.new("TextLabel") SmoothnessLabel.Name = "SmoothnessLabel" SmoothnessLabel.Text = "自瞄平滑度" SmoothnessLabel.TextColor3 = Color3.fromRGB(255, 255, 255) SmoothnessLabel.BackgroundTransparency = 1 SmoothnessLabel.Position = UDim2.new(0.1, 0, 0.5, 0) SmoothnessLabel.Size = UDim2.new(0.8, 0, 0.2, 0) SmoothnessLabel.Parent = Frame local SmoothnessSlider = Instance.new("TextBox") SmoothnessSlider.Name = "SmoothnessSlider" SmoothnessSlider.Text = tostring(smoothness) SmoothnessSlider.TextColor3 = Color3.fromRGB(255, 255, 255) SmoothnessSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50) SmoothnessSlider.Position = UDim2.new(0.1, 0, 0.7, 0) SmoothnessSlider.Size = UDim2.new(0.8, 0, 0.2, 0) SmoothnessSlider.Parent = Frame local CrosshairDistanceLabel = Instance.new("TextLabel") CrosshairDistanceLabel.Name = "CrosshairDistanceLabel" CrosshairDistanceLabel.Text = "自瞄预判距离" CrosshairDistanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255) CrosshairDistanceLabel.BackgroundTransparency = 1 CrosshairDistanceLabel.Position = UDim2.new(0.1, 0, 0.9, 0) CrosshairDistanceLabel.Size = UDim2.new(0.8, 0, 0.2, 0) CrosshairDistanceLabel.Parent = Frame local CrosshairDistanceSlider = Instance.new("TextBox") CrosshairDistanceSlider.Name = "CrosshairDistanceSlider" CrosshairDistanceSlider.Text = tostring(crosshairDistance) CrosshairDistanceSlider.TextColor3 = Color3.fromRGB(255, 255, 255) CrosshairDistanceSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50) CrosshairDistanceSlider.Position = UDim2.new(0.1, 0, 1.1, 0) CrosshairDistanceSlider.Size = UDim2.new(0.8, 0, 0.2, 0) CrosshairDistanceSlider.Parent = Frame local targetCFrame = Cam.CFrame local function updateDrawings() local camViewportSize = Cam.ViewportSize FOVring.Position = camViewportSize / 2 FOVring.Radius = fov end local function onKeyDown(input) if input.KeyCode == Enum.KeyCode.Delete then RunService:UnbindFromRenderStep("FOVUpdate") FOVring:Remove() end end UserInputService.InputBegan:Connect(onKeyDown) local function getClosestPlayerInFOV(trg_part) local nearest = nil local last = math.huge local playerMousePos = Cam.ViewportSize / 2 for _, player in ipairs(Players:GetPlayers()) do if player ~= Players.LocalPlayer then local part = player.Character and player.Character:FindFirstChild(trg_part) if part then local ePos, isVisible = Cam:WorldToViewportPoint(part.Position) local distance = (Vector2.new(ePos.x, ePos.y) - playerMousePos).Magnitude if distance < last and isVisible and distance < fov then last = distance nearest = player end end end end return nearest end RunService.RenderStepped:Connect(function() updateDrawings() local closest = getClosestPlayerInFOV("Head") if closest and closest.Character:FindFirstChild("Head") then local targetCharacter = closest.Character local targetHead = targetCharacter.Head local targetRootPart = targetCharacter:FindFirstChild("HumanoidRootPart") local isMoving = targetRootPart.Velocity.Magnitude > 0.1 local targetPosition if isMoving then targetPosition = targetHead.Position + (targetHead.CFrame.LookVector * crosshairDistance) else targetPosition = targetHead.Position end targetCFrame = CFrame.new(Cam.CFrame.Position, targetPosition) else targetCFrame = Cam.CFrame end Cam.CFrame = Cam.CFrame:Lerp(targetCFrame, 1 / smoothness) end) FovSlider.FocusLost:Connect(function(enterPressed, inputThatCausedFocusLoss) if enterPressed then local newFov = tonumber(FovSlider.Text) if newFov then fov = newFov else FovSlider.Text = tostring(fov) end end end) SmoothnessSlider.FocusLost:Connect(function(enterPressed, inputThatCausedFocusLoss) if enterPressed then local newSmoothness = tonumber(SmoothnessSlider.Text) if newSmoothness then smoothness = newSmoothness else SmoothnessSlider.Text = tostring(smoothness) end end end) CrosshairDistanceSlider.FocusLost:Connect(function(enterPressed, inputThatCausedFocusLoss) if enterPressed then local newCrosshairDistance = tonumber(CrosshairDistanceSlider.Text) if newCrosshairDistance then crosshairDistance = newCrosshairDistance else CrosshairDistanceSlider.Text = tostring(crosshairDistance) end end end)
 end)
 
@@ -1091,21 +1099,537 @@ end)
 button.MouseButton1Click:Connect(toggleRagdoll)
 end)
 
-about:Button("紫莎",function()
-game.Players.LocalPlayer.Character.Humanoid.Health=0
+about:Button("燃尽脚本",function()
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fake-lag-41217"))()
 end)
 
-about:Button("紫莎",function()
-game.Players.LocalPlayer.Character.Humanoid.Health=0
+about:Button("机枪手[可甩飞]",function()
+loadstring(game:HttpGet("https://gist.githubusercontent.com/MelonsStuff/e7b408abcb813525d37e9b7a6bf301c9/raw/6421f9000e90e8a4c2ed57052208acbd6f9648dd/Minigun.txt"))()
 end)
 
-about:Button("紫莎",function()
-game.Players.LocalPlayer.Character.Humanoid.Health=0
+about:Button("聊天查询",function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/v-oidd/chat-tracker/main/chat-tracker.lua"))()
 end)
 
-about:Button("紫莎",function()
-game.Players.LocalPlayer.Character.Humanoid.Health=0
+about:Button("聊天过滤",function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/2EzMyBoi/Roblox-Script/refs/heads/main/UselessBypasser",true))()
 end)
+
+local UITab5 = win:Tab("触碰范围",'117404188324801')
+
+local about = UITab5:section("触碰范围",true)
+
+about:Button("范围5",function()
+_G.HeadSize = 5
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围10",function()
+_G.HeadSize = 10
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围15",function()
+_G.HeadSize = 15
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围20",function()
+_G.HeadSize = 20
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围25",function()
+_G.HeadSize = 25
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围30",function()
+_G.HeadSize = 30
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围35",function()
+_G.HeadSize = 35
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围40",function()
+_G.HeadSize = 40
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围50",function()
+_G.HeadSize = 50
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围60",function()
+_G.HeadSize = 60
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围70",function()
+_G.HeadSize = 70
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围80",function()
+_G.HeadSize = 80
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围90",function()
+_G.HeadSize = 90
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+about:Button("范围100",function()
+_G.HeadSize = 100
+_G.Disabled = true
+
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+local UITab6 = win:Tab("人物旋转",'117404188324801')
+
+about:Button("速度5",function()
+    local speed = 5
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度10",function()
+    local speed = 10
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度20",function()
+    local speed = 20
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度30",function()
+    local speed = 30
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度40",function()
+    local speed = 40
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度50",function()
+    local speed = 50
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度60",function()
+    local speed = 60
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度70",function()
+    local speed = 70
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度80",function()
+    local speed = 80
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度90",function()
+    local speed = 90
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度100",function()
+    local speed = 100
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+about:Button("速度10000",function()
+    local speed = 10000
+
+local plr = game:GetService("Players").LocalPlayer
+repeat task.wait() until plr.Character
+local humRoot = plr.Character:WaitForChild("HumanoidRootPart")
+plr.Character:WaitForChild("Humanoid").AutoRotate = false
+local velocity = Instance.new("AngularVelocity")
+velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+velocity.MaxTorque = math.huge
+velocity.AngularVelocity = Vector3.new(0, speed, 0)
+velocity.Parent = humRoot
+velocity.Name = "Spinbot"
+end)
+
+local UITab7 = win:Tab("人物自瞄",'117404188324801')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 local UITab4 = win:Tab("巴掌大战",'117404188324801')
 
@@ -1463,5 +1987,5 @@ local UITab999 = win:Tab("制作中....",'117404188324801')
 
 local about = UITab999:section("制作中.....",true)
 
-about:Label("当前版本处于1.2版本，还在持续制作其他功能")
+about:Label("当前版本处于1.1版本，还在持续制作其他功能")
 about:Label("此脚本支持云更新")
