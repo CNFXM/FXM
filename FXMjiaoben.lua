@@ -54,7 +54,7 @@ local tween = TweenService:Create(UIGradient, tweeninfo, {Rotation = 360})
 tween:Play() -- 修正为英文逗号
 -----------------弹窗消息------------------
 game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM脚本"; Text ="欢迎使用!此脚本为半缝合!"; Duration = 2; })
-game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM"; Text ="发布时间:25/10/2,当前版本为1.25"; Duration = 4; })
+game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM"; Text ="发布时间:25/10/4,当前版本为1.3"; Duration = 4; })
 game:GetService("StarterGui"):SetCore("SendNotification",{ Title = "FXM"; Text ="祝大家国庆快乐!"; Duration = 6; })
 -----------------加载框架------------------
 local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/CNFXM/FXM/main/FXMUIV2.lua"))();        
@@ -66,8 +66,8 @@ local UITab1 = win:Tab("信息公告",'131298529372722')
 local about = UITab1:section("更新公告",false)
 
 about:Label("发布时间2025/10/2")
-about:Label("当前版本:1.25")
-about:Label("更新：信息复制")
+about:Label("当前版本:1.3")
+about:Label("更新：力量传奇")
 about:Label("公告：作者老开心了,成功的当上了素辞的徒弟🤓")
 about:Label("算了后面的课慢慢补🤓👍")
 about:Label("作者不忘初心，永久免费脚本")
@@ -4487,6 +4487,13 @@ about:Toggle("自动锻炼","Toggle",false,function(Value)
     end
 end)
 
+about:Toggle("自动重生", function(Value) -- 修正命名，简化冗余参数
+    while Value do -- 用开关状态Value控制循环（开启时Value为true）
+        wait(1) -- 增加等待间隔，避免高频调用导致服务器检测或崩溃
+        game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+    end
+end)
+
 -- 自动挥拳（保留优化后的代码）
 about:Toggle("自动挥拳","Toggle",false,function(Value)
     AutoPunchEnabled = Value
@@ -4510,25 +4517,68 @@ about:Toggle("自动挥拳","Toggle",false,function(Value)
     end
 end)
 
--- 自动宝箱（保留你的传送逻辑）
-about:Button("自动宝箱",function()
-    local teleportPoints = {
-        CFrame.new(-138.17,7.33,-276.85),        
-        CFrame.new(4680.29,1001.05,-3689.63),    
-        CFrame.new(2213.03,7.33,918.64),    
-        CFrame.new(-6713.86,7.33,-1454.19),  
-        CFrame.new(-2572.08,7.33,-556.94),        
-        CFrame.new(40.71,7.33,410.27),    
-        CFrame.new(-7914.54,4.30,3028.47)
-    }
+about:Button("自动宝箱（传送+检测）[重复2次]", function()
     spawn(function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local rootPart = character:WaitForChild("HumanoidRootPart")
-        for i, targetCFrame in ipairs(teleportPoints) do
-            rootPart.CFrame = targetCFrame
-            task.wait(0.5)
+        local repeatTimes = 2
+        for cycle = 1, repeatTimes do
+            -- 替换“开始轮次”提示
+            showNotice(string.format("开始第 %d/%d 轮宝箱流程", cycle, repeatTimes))
+            
+            -- 1. 传送逻辑
+            local teleportPoints = {
+                CFrame.new(-138.17,7.33,-276.85),        
+                CFrame.new(4680.29,1001.05,-3689.63),    
+                CFrame.new(2213.03,7.33,918.64),    
+                CFrame.new(-6713.86,7.33,-1454.19),  
+                CFrame.new(-2572.08,7.33,-556.94),        
+                CFrame.new(40.71,7.33,410.27),    
+                CFrame.new(-7914.54,4.30,3028.47)
+            }
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            
+            for _, targetCFrame in ipairs(teleportPoints) do
+                rootPart.CFrame = targetCFrame
+                task.wait(5)
+            end
+            task.wait(1)
+            -- 新增“传送完成”提示
+            showNotice("本轮传送已完成，准备检测宝箱")
+            
+            -- 2. 宝箱检测逻辑
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local chestRewards = ReplicatedStorage:FindFirstChild("chestRewards")
+            local checkRemote = ReplicatedStorage:FindFirstChild("rEvents"):FindFirstChild("checkChestRemote")
+            
+            if not chestRewards or not checkRemote then
+                -- 替换“对象缺失”提示
+                showNotice("宝箱目录或检测事件不存在，跳过本轮")
+                task.wait(2)
+                continue
+            end
+            
+            local jk = {}
+            for _, v in pairs(chestRewards:GetDescendants()) do
+                if v.Name ~= "Light Karma Chest" and v.Name ~= "Evil Karma Chest" then
+                    table.insert(jk, v.Name)
+                end
+            end
+            
+            for _, chestName in ipairs(jk) do
+                checkRemote:InvokeServer(chestName)
+                task.wait(2)
+            end
+            -- 新增“检测完成”提示
+            showNotice(string.format("第 %d/%d 轮宝箱检测完成", cycle, repeatTimes))
+            
+            -- 替换“轮间等待”提示
+            showNotice("等待3秒后进入下一轮")
+            task.wait(3)
         end
+        
+        -- 替换“全部完成”提示
+        showNotice("所有2轮宝箱流程已执行完毕！")
     end)
 end)
 
@@ -4761,7 +4811,7 @@ about:Toggle("400000石头", "Toggle", false, function(Value)
 
                     -- 1. 循环传送逻辑
                     if rootPart then
-                        rootPart.CFrame = CFrame.new(2155.72,1.13,1225.74)
+                        rootPart.CFrame = CFrame.new(2186.48,8.09,1290.90)
                     end
 
                     -- 2. 装备背包中的Punch工具
@@ -4802,7 +4852,7 @@ about:Toggle("750000石头", "Toggle", false, function(Value)
 
                     -- 1. 循环传送逻辑
                     if rootPart then
-                        rootPart.CFrame = CFrame.new(-7226.99,0.94,-1269.56)
+                        rootPart.CFrame = CFrame.new(-7262.31,9.66,-1218.25)
                     end
 
                     -- 2. 装备背包中的Punch工具
@@ -4843,7 +4893,7 @@ about:Toggle("100万石头", "Toggle", false, function(Value)
 
                     -- 1. 循环传送逻辑
                     if rootPart then
-                        rootPart.CFrame = CFrame.new(4186.71,985.46,-4062.71)
+                        rootPart.CFrame = CFrame.new(4132.50,991.64,-4035.54)
                     end
 
                     -- 2. 装备背包中的Punch工具
@@ -4884,7 +4934,7 @@ about:Toggle("500万石头", "Toggle", false, function(Value)
 
                     -- 1. 循环传送逻辑
                     if rootPart then
-                        rootPart.CFrame = CFrame.new(-9016.74,11.40,-6110.15)
+                        rootPart.CFrame = CFrame.new(-8985.91,17.23,-5989.86)
                     end
 
                     -- 2. 装备背包中的Punch工具
@@ -4925,7 +4975,7 @@ about:Toggle("1000万石头", "Toggle", false, function(Value)
 
                     -- 1. 循环传送逻辑
                     if rootPart then
-                        rootPart.CFrame = CFrame.new(-7691.23,1.89,2872.91)
+                        rootPart.CFrame = CFrame.new(-7639.93,4.30,3007.76)
                     end
 
                     -- 2. 装备背包中的Punch工具
@@ -4951,7 +5001,21 @@ end)
 
 local about = UITab13:section("美化区域",true)
 
-local about = UITab13:section("击杀区域",true)
+about:Textbox("修改力量", "", "输入", function(FXM)
+game:GetService("Players").LocalPlayer.leaderstats.Strength.Value = FXM
+end)
+
+about:Textbox("修改重生", "", "输入", function(FXM)
+game:GetService("Players").LocalPlayer.leaderstats.Rebirths.Value = FXM
+end)
+
+about:Textbox("修改击杀", "", "输入", function(FXM)
+game:GetService("Players").LocalPlayer.leaderstats.Kills.Value = FXM
+end)
+
+about:Textbox("修改胜场", "", "输入", function(FXM)
+game:GetService("Players").LocalPlayer.leaderstats.Brawls.Value = FXM
+end)
 
 
 
@@ -4960,7 +5024,7 @@ local UITab999 = win:Tab("制作中....",'131298529372722')
 
 local about = UITab999:section("制作中.....",true)
 
-about:Label("当前版本处于1.25版本，还在持续制作其他功能")
+about:Label("当前版本处于1.3版本，还在持续制作其他功能")
 about:Label("此脚本支持云更新")
 
 win:Show()
