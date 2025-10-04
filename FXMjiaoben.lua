@@ -4448,7 +4448,7 @@ if Value == "肌肉之王[5]" then
     elseif Value == "神话健身房[5]" then
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2473.62,15.17,1073.36)
     elseif Value == "永恒健身房[15]" then
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-6978.05,15.17,-1285.39)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-6980.48,15.17,-1285.60)
     elseif Value == "传奇健身房[30]" then
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(4352.58,999.07,-3854.01)
     elseif Value == "丛林健身房[60]" then
@@ -4534,98 +4534,424 @@ end)
 
 local about = UITab13:section("石头区域",true)
 
--- 保留全局循环控制变量，确保点击框也能实现“单次启动/强制中断”
-local loopConnection = nil
+about:Label("请先开启自动挥拳")
 
-about:Button("石头[0]", function()
-    -- 1. 若已有循环在运行：点击则强制中断
-    if loopConnection then
-        loopConnection:Disconnect()
-        loopConnection = nil
-        AutoPunchEnabled = false -- 同步更新状态变量
-        return
-    end
+-- 先初始化全局开关变量，避免未定义报错
+getgenv().RK0 = false
 
-    -- 2. 若没有循环运行：点击则启动新循环
-    AutoPunchEnabled = true
-    loopConnection = task.spawn(function()
-        -- 循环条件改为“判断loopConnection是否存在”（替代原Toggle的Value）
-        while loopConnection do
-            -- 防报错：确保玩家、角色、根部件加载完成
-            local player = game.Players.LocalPlayer
-            if player and player.Character then
-                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- 目标坐标：X:156.88, Y:3.11, Z:-147.79
-                    rootPart.CFrame = CFrame.new(9.36,3.83,2103.81)
+about:Toggle("0石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(15.53,0.76,2117.85)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
                 end
+                wait(0.1)
             end
-            task.wait(0.1) -- 循环刷新间隔
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
         end
-    end)
+    end
 end)
 
-about:Button("石头[10]", function()
-    -- 1. 若已有循环在运行：点击则强制中断
-    if loopConnection then
-        loopConnection:Disconnect()
-        loopConnection = nil
-        AutoPunchEnabled = false -- 同步更新状态变量
-        return
-    end
+about:Toggle("10石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
 
-    -- 2. 若没有循环运行：点击则启动新循环
-    AutoPunchEnabled = true
-    loopConnection = task.spawn(function()
-        -- 循环条件改为“判断loopConnection是否存在”（替代原Toggle的Value）
-        while loopConnection do
-            -- 防报错：确保玩家、角色、根部件加载完成
-            local player = game.Players.LocalPlayer
-            if player and player.Character then
-                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- 目标坐标：X:156.88, Y:3.11, Z:-147.79
-                    rootPart.CFrame = CFrame.new(-162.04,3.67,419.35)
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(-151.39,2.10,437.53)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
                 end
+                wait(0.1)
             end
-            task.wait(0.1) -- 循环刷新间隔
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
         end
-    end)
+    end
 end)
 
-about:Button("石头[100]", function()
-    -- 1. 若已有循环在运行：点击则强制中断
-    if loopConnection then
-        loopConnection:Disconnect()
-        loopConnection = nil
-        AutoPunchEnabled = false -- 同步更新状态变量
-        return
-    end
+about:Toggle("100石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
 
-    -- 2. 若没有循环运行：点击则启动新循环
-    AutoPunchEnabled = true
-    loopConnection = task.spawn(function()
-        -- 循环条件改为“判断loopConnection是否存在”（替代原Toggle的Value）
-        while loopConnection do
-            -- 防报错：确保玩家、角色、根部件加载完成
-            local player = game.Players.LocalPlayer
-            if player and player.Character then
-                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- 目标坐标：X:156.88, Y:3.11, Z:-147.79
-                    rootPart.CFrame = CFrame.new(156.88, 3.11, -147.79)
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(164.47,1.24,-137.76)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
                 end
+                wait(0.1)
             end
-            task.wait(0.1) -- 循环刷新间隔
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
         end
-    end)
+    end
 end)
 
+about:Toggle("5000石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
 
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
 
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(313.02,2.06,-559.59)
+                    end
 
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
 
+about:Toggle("150000石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
 
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(-2514.23,1.07,-256.83)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+about:Toggle("400000石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(2155.72,1.13,1225.74)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+about:Toggle("750000石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(-7226.99,0.94,-1269.56)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+about:Toggle("100万石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(4186.71,985.46,-4062.71)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+about:Toggle("500万石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(-9016.74,11.40,-6110.15)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+about:Toggle("1000万石头", "Toggle", false, function(Value)
+    -- 将开关值同步到全局RK0变量，统一控制逻辑
+    getgenv().RK0 = Value
+    Jump = Value
+
+    -- 开启开关：启动循环传送+装备Punch工具
+    if Value then
+        spawn(function()
+            while Jump do
+                local plr = game.Players.LocalPlayer
+                -- 空值判断，确保角色、人形和根部件加载完成
+                if plr and plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    -- 1. 循环传送逻辑
+                    if rootPart then
+                        rootPart.CFrame = CFrame.new(-7691.23,1.89,2872.91)
+                    end
+
+                    -- 2. 装备背包中的Punch工具
+                    local punch = plr.Backpack:FindFirstChild("Punch")
+                    if punch and punch:IsA("Tool") and humanoid then
+                        humanoid:EquipTool(punch)
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+    else
+        -- 关闭开关：自动卸下所有工具
+        local plr = game.Players.LocalPlayer
+        if plr and plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:UnequipTools()
+            end
+        end
+    end
+end)
+
+local about = UITab13:section("美化区域",true)
+
+local about = UITab13:section("击杀区域",true)
 
 
 
