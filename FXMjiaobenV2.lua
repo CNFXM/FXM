@@ -130,7 +130,7 @@ local TabHandles = {
            
 }
 -----------------公告区域------------------
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "欢迎使用FXM脚本",
     Desc = "FXM脚本最始源于2021年",
     Image = "rbxassetid://81944629903864",
@@ -139,35 +139,35 @@ local Paragraph = GGXX1:Paragraph({
     ThumbnailSize = 120,
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "当你执行了主脚本",
     Desc = "那么你已经同意了玩家封号我们概不负责!",
     ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
     ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "师傅:",
     Desc = "素辞",
     ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
     ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "合作人:",
     Desc = "越 HB",
     ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
     ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "资助人:",
     Desc = "越 HB",
     ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
     ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "复制主群",
     Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
     Buttons = {{
@@ -193,7 +193,7 @@ local Paragraph = GGXX1:Paragraph({
     }}
 })
 
-local Paragraph = GGXX1:Paragraph({
+local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "复制2群",
     Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
     Buttons = {{
