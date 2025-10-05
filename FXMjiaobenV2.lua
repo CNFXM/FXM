@@ -54,7 +54,7 @@ tween:Play() -- 修正为英文逗号
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-        Title = "FXM脚本<font color='#00FF00'>1.5</font>",
+        Title = "FXM<font color='#00FF00'>脚本</font>",
         Icon = "rbxassetid://81944629903864",
         IconTransparency = 0.5,
         IconThemed = true,
@@ -99,6 +99,7 @@ Window:Tag({
 
 -----------------分类区域------------------
 local Tabs = {
+    GGXX = Window:Section({ Title = "公告信息", Opened = true }),
     UI = Window:Section({ Title = "UI设置", Opened = true }),
     JBGJHZ = Window:Section({ Title = "混杂工具", Opened = true }),
     Main = Window:Section({ Title = "通用功能", Opened = true }),
@@ -106,6 +107,9 @@ local Tabs = {
 }
 
 local TabHandles = {
+    GGXX1 = Tabs.JBGG:Tab({ Title = "公告区域", Icon = "layout-grid" }),
+    GGXX2 = Tabs.JBGG:Tab({ Title = "更新区域", Icon = "layout-grid" }),
+    GGXX3 = Tabs.JBGG:Tab({ Title = "信息区域", Icon = "layout-grid" }),
     UI = Tabs.UI:Tab({ Title = "UI区域", Icon = "layout-grid" }),
     JBGJHZ = Tabs.JBGJHZ:Tab({ Title = "工具区域", Icon = "layout-grid" }),
     YI = Tabs.Main:Tab({ Title = "调节区域", Icon = "layout-grid" }),
@@ -125,6 +129,96 @@ local TabHandles = {
     H = Tabs.gn:Tab({ Title = "墨水游戏", Icon = "layout-grid" }),
            
 }
+-----------------公告区域------------------
+local Paragraph = Tab:Paragraph({
+    Title = "欢迎使用FXM脚本",
+    Desc = "FXM脚本最始源于2021年",
+    Image = "rbxassetid://81944629903864",
+    ImageSize = 42,
+    Thumbnail = "rbxassetid://106059549481927",
+    ThumbnailSize = 120,
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "当你执行了主脚本",
+    Desc = "那么你已经同意了玩家封号我们概不负责!",
+    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
+    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "师傅:",
+    Desc = "素辞",
+    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
+    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "合作人:",
+    Desc = "越 HB",
+    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
+    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "资助人:",
+    Desc = "越 HB",
+    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
+    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "复制主群",
+    Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
+    Buttons = {{
+        Title = "QQ主群:945593455",
+        Icon = "copy", -- 恢复“复制”图标，更贴合功能
+        Variant = "Primary",
+        Callback = function()
+            -- 核心修改：把复制的内容换成固定的"FXM"
+            setclipboard("945593455")
+
+            -- 以下提示音、通知逻辑保持不变，确保操作反馈正常
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+            WindUI:Notify({
+                Title = "HB脚本中心---提示：",
+                Content = "已成功复制FXM！", -- 通知内容也同步修改
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
+
+local Paragraph = Tab:Paragraph({
+    Title = "复制2群",
+    Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
+    Buttons = {{
+        Title = "QQ2群:301342746",
+        Icon = "copy", -- 恢复“复制”图标，更贴合功能
+        Variant = "Primary",
+        Callback = function()
+            -- 核心修改：把复制的内容换成固定的"FXM"
+            setclipboard("301342746")
+
+            -- 以下提示音、通知逻辑保持不变，确保操作反馈正常
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+            WindUI:Notify({
+                Title = "HB脚本中心---提示：",
+                Content = "已成功复制FXM！", -- 通知内容也同步修改
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
+
 -----------------UI设置------------------
 local Button = TabHandles.UI:Button({
     Title = "自定义界面",
