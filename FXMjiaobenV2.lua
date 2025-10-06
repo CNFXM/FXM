@@ -102,6 +102,7 @@ local Tabs = {
     GGXX = Window:Section({ Title = "公告信息", Opened = true }),
     UI = Window:Section({ Title = "UI设置", Opened = true }),
     JBGJHZ = Window:Section({ Title = "混杂工具", Opened = true }),
+    GDJB = Window:Section({ Title = "更多脚本", Opened = true }),
     Main = Window:Section({ Title = "通用功能", Opened = true }),
     gn = Window:Section({ Title = "缝合脚本", Opened = true }),    
 }
@@ -112,6 +113,8 @@ local TabHandles = {
     GGXX3 = Tabs.GGXX:Tab({ Title = "信息区域", Icon = "layout-grid" }),
     UI = Tabs.UI:Tab({ Title = "UI区域", Icon = "layout-grid" }),
     JBGJHZ = Tabs.JBGJHZ:Tab({ Title = "工具区域", Icon = "layout-grid" }),
+    GDJB1 = Tabs.GDJB:Tab({ Title = "汉化区域", Icon = "layout-grid" }),
+    GDJB2 = Tabs.GDJB:Tab({ Title = "更多区域", Icon = "layout-grid" }),
     YI = Tabs.Main:Tab({ Title = "调节区域", Icon = "layout-grid" }),
     ER = Tabs.Main:Tab({ Title = "透视功能", Icon = "layout-grid" }),    
     gn = Tabs.Main:Tab({ Title = "越 HB脚本", Icon = "layout-grid" }),
@@ -779,6 +782,145 @@ Button = TabHandles.JBGJHZ:Button({
     Locked = false,
     Callback = function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Articles-Hub/ROBLOXScript/refs/heads/main/SCRIPT/SimpleSpy/SourceBeta.lua"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+-----------------汉化区域------------------
+local Paragraph = TabHandles.GDJB1:Paragraph({
+    Title = "FXM汉化组",
+    Desc = "我们会持续更新汉化的",
+    Image = "rbxassetid://81944629903864",
+    ImageSize = 42,
+    Thumbnail = "rbxassetid://129520761931276",
+    ThumbnailSize = 120,
+})
+
+Button = TabHandles.GDJB1:Button({
+    Title = "汉化黑洞",
+    Desc = "让掉落零件围绕人物旋转",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMheidong.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+-----------------更多区域------------------
+local Paragraph = TabHandles.GDJB2:Paragraph({
+    Title = "更多区域",
+    Desc = "更快的切换别人的脚本",
+    Image = "rbxassetid://81944629903864",
+    ImageSize = 42,
+    Thumbnail = "rbxassetid://140327980260811",
+    ThumbnailSize = 120,
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "越脚本",
+    Desc = "不必多言合作人",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/obfuscated_script-1759031266212.lua.txt"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "小月脚本",
+    Desc = "不必多言合师傅",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MIAN57/-/refs/heads/main/%E5%B0%8F%E6%9C%88%E8%84%9A%E6%9C%AC%E6%BA%90%E7%A0%81"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "TX脚本",
+    Desc = "不必多言",
+    Locked = false,
+    Callback = function()
+TX = "脚本群:160369111"
+Script = "Free永久免费"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/JsYb666/TX-Free-YYDS/refs/heads/main/FREE-TX-TEAM"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "安脚本",
+    Desc = "需要加入组群才可执行",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Anscripterato/QQ2134702438/refs/heads/main/byato/AnScript/atoscript"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "BS脚本",
+    Desc = "不必多言",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://gitlab.com/ajduoxcz/bs-center-of-the-black-hole/-/raw/main/BS%20Center%20of%20the%20black%20hole"))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB2:Button({
+    Title = "皮脚本",
+    Desc = "不必多言",
+    Locked = false,
+    Callback = function()
+getgenv().XiaoPi="皮脚本QQ群1002100032" loadstring(game:HttpGet("https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua"))()
         
 WindUI:Notify({
     Title = "FXM脚本",
