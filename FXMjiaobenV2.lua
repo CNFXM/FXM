@@ -228,34 +228,31 @@ local Paragraph = TabHandles.GGXX2:Paragraph({
     ThumbnailSize = 120,
 })
 -----------------信息区域------------------
--- 1. 创建带时间显示的Paragraph显示框
-local Paragraph = TabHandles.GGXX2:Paragraph({
-    Title = "FXM脚本重置版0.5:",
-    Desc = "时间", -- 初始直接显示“时间”
-    Image = "rbxassetid://81944629903864",
-    ImageSize = 42,
-    Thumbnail = "rbxassetid://128537295758977",
-    ThumbnailSize = 120,
+
+local Paragraph = TabHandles.GGXX1:Paragraph({
+    Title = "时间",
+    Desc = "北京时间: 加载中...", -- 初始占位文本
+    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
+    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
 })
 
--- 2. 实时更新时间逻辑
+-- 整合实时更新北京时间的核心逻辑
 local RunService = game:GetService("RunService")
 
+-- 实时更新时间的函数（直接修改Paragraph的Desc文本）
 local function updateTime()
-    local hour = os.date("%H")
-    local minute = os.date("%M")
-    local second = os.date("%S")
-    -- 固定“时间”为前缀，换行显示具体北京时间
-    Paragraph.Desc = "时间\n北京时间: " .. hour .. "时" .. minute .. "分" .. second .. "秒"
+    local hour = os.date("%H") -- 24小时制小时
+    local minute = os.date("%M") -- 分钟
+    local second = os.date("%S") -- 秒
+    -- 直接更新Desc为格式化后的时间
+    Paragraph.Desc = "北京时间:" .. hour .. "时" .. minute .. "分" .. second .. "秒"
 end
 
--- 初始执行，避免空白
+-- 立即执行一次，避免初始显示占位文本
 updateTime()
 
--- 每帧同步更新
-RunService.RenderStepped:Connect(updateTime)
-
-
+-- 绑定Heartbeat事件，实时同步时间
+RunService.Heartbeat:Connect(updateTime)
 -----------------UI设置------------------
 local Button = TabHandles.UI:Button({
     Title = "自定义界面",
