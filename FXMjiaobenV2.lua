@@ -1077,7 +1077,9 @@ Slider = TabHandles.JBTY1:Slider({
             _G.SpinbotData = {
                 speed = 0,
                 velocity = nil,
-                characterAddedConnection = nil
+                characterAddedConnection = nil,
+                originalCFrame = nil,
+                originalAutoRotate = true
             }
         end
         
@@ -1085,13 +1087,19 @@ Slider = TabHandles.JBTY1:Slider({
         data.speed = Value
         
         local plr = game:GetService("Players").LocalPlayer
-        local UIS = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
         
         -- 旋转功能函数
         local function setupSpinbot(character)
             -- 等待角色加载完成
             local hum = character:WaitForChild("Humanoid")
             local humRoot = character:WaitForChild("HumanoidRootPart")
+            
+            -- 保存原始状态
+            if not data.originalCFrame then
+                data.originalCFrame = humRoot.CFrame
+                data.originalAutoRotate = hum.AutoRotate
+            end
             
             -- 清理旧的旋转组件
             if data.velocity then
@@ -1120,16 +1128,29 @@ Slider = TabHandles.JBTY1:Slider({
                 -- 创建旋转组件并应用速度
                 data.velocity = Instance.new("AngularVelocity")
                 data.velocity.Attachment0 = rootAttachment
+                data.velocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
                 data.velocity.MaxTorque = math.huge
                 data.velocity.AngularVelocity = Vector3.new(0, data.speed, 0)
                 data.velocity.Parent = humRoot
                 data.velocity.Name = "Spinbot"
                 
-                print("旋转已启动，当前速度：" .. data.speed)
             else
                 -- 速度为0时，恢复默认状态
-                hum.AutoRotate = true
-                print("速度设置为0，旋转已停止，角色恢复默认状态")
+                hum.AutoRotate = data.originalAutoRotate
+                
+                -- 恢复角色到原始朝向
+                if data.originalCFrame then
+                    -- 使用一个小循环来确保角色朝向正确恢复
+                    local startTime = tick()
+                    local connection
+                    connection = RunService.Heartbeat:Connect(function()
+                        if tick() - startTime < 2 then -- 2秒内持续修正
+                            humRoot.CFrame = CFrame.new(humRoot.Position, humRoot.Position + data.originalCFrame.LookVector)
+                        else
+                            connection:Disconnect()
+                        end
+                    end)
+                end
             end
         end
         
@@ -1141,18 +1162,13 @@ Slider = TabHandles.JBTY1:Slider({
         -- 监听角色重生
         if not data.characterAddedConnection then
             data.characterAddedConnection = plr.CharacterAdded:Connect(function(character)
-                task.wait(0.5) -- 等待角色完全加载
+                task.wait(1) -- 等待角色完全加载
+                -- 重置原始状态记录
+                data.originalCFrame = nil
+                data.originalAutoRotate = true
                 setupSpinbot(character)
             end)
         end
-        
-        -- 通知用户当前速度
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = "旋转速度: " .. Value,
-            Duration = 2,
-            Icon = "layout-grid",
-        })
     end
 })
 
@@ -3278,108 +3294,6 @@ Toggle = TabHandles.JBTY3:Toggle({
     Value = false, 
     Callback = function(Value)
         getgenv().ShowBox = Value
-    end
-})
-
--- 将库加载移到外部，避免重复加载
-if not _G.SkeletonLibrary then
-    _G.SkeletonLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
-end
-_G.Skeletons = _G.Skeletons or {}
-_G.SkeletonConnections = _G.SkeletonConnections or {}
-
-Toggle = TabHandles.JBTY3:Toggle({
-    Title = "透视骨骼",
-    Value = false,
-    Callback = function(state) 
-        if state then -- 开启骨骼透视
-            -- 清理之前的连接
-            if _G.SkeletonConnections.PlayerAdded then
-                _G.SkeletonConnections.PlayerAdded:Disconnect()
-            end
-            if _G.SkeletonConnections.PlayerRemoving then
-                _G.SkeletonRemoving:Disconnect()
-            end
-            
-            local function CreateSkeleton(Player)
-                if Player ~= game.Players.LocalPlayer then
-                    -- 等待玩家角色加载
-                    local character = Player.Character
-                    if not character then
-                        -- 如果角色不存在，等待角色加载
-                        Player.CharacterAdded:Wait()
-                    end
-                    
-                    -- 创建骨骼
-                    local success, skeleton = pcall(function()
-                        return _G.SkeletonLibrary:NewSkeleton(Player, true)
-                    end)
-                    
-                    if success and skeleton then
-                        _G.Skeletons[Player] = skeleton
-                        print("已为玩家 " .. Player.Name .. " 创建骨骼")
-                    else
-                        warn("为玩家 " .. Player.Name .. " 创建骨骼失败")
-                    end
-                end
-            end
-            
-            -- 为现有玩家创建骨骼
-            for _, Player in ipairs(game.Players:GetPlayers()) do
-                coroutine.wrap(CreateSkeleton)(Player)
-            end
-            
-            -- 监听新玩家加入
-            _G.SkeletonConnections.PlayerAdded = game.Players.PlayerAdded:Connect(function(Player)
-                wait(2) -- 等待玩家完全加入
-                coroutine.wrap(CreateSkeleton)(Player)
-            end)
-            
-            -- 监听玩家离开
-            _G.SkeletonConnections.PlayerRemoving = game.Players.PlayerRemoving:Connect(function(Player)
-                if _G.Skeletons[Player] then
-                    if _G.Skeletons[Player].Destroy then
-                        _G.Skeletons[Player]:Destroy()
-                    end
-                    _G.Skeletons[Player] = nil
-                end
-            end)
-            
-            -- 通知
-            WindUI:Notify({
-                Title = "通知",
-                Content = "透视骨骼已开启",
-                Duration = 3,
-                Icon = "layout-grid",
-            })
-            
-        else -- 关闭骨骼透视
-            -- 断开连接
-            if _G.SkeletonConnections.PlayerAdded then
-                _G.SkeletonConnections.PlayerAdded:Disconnect()
-                _G.SkeletonConnections.PlayerAdded = nil
-            end
-            if _G.SkeletonConnections.PlayerRemoving then
-                _G.SkeletonConnections.PlayerRemoving:Disconnect()
-                _G.SkeletonConnections.PlayerRemoving = nil
-            end
-            
-            -- 销毁所有骨骼
-            for Player, skeleton in pairs(_G.Skeletons) do
-                if skeleton and skeleton.Destroy then
-                    skeleton:Destroy()
-                end
-            end
-            _G.Skeletons = {}
-            
-            -- 通知
-            WindUI:Notify({
-                Title = "通知",
-                Content = "透视骨骼已关闭",
-                Duration = 3,
-                Icon = "layout-grid",
-            })
-        end
     end
 })
 
