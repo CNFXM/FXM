@@ -1689,7 +1689,7 @@ WindUI:Notify({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "撸关R15",
     Desc = "",
     Locked = false,
@@ -1706,7 +1706,7 @@ Button = TabHandles.YI:Button({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "撸关R6",
     Desc = "",
     Locked = false,
@@ -1723,7 +1723,7 @@ Button = TabHandles.YI:Button({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "甩飞",
     Desc = "",
     Locked = false,
@@ -2236,7 +2236,7 @@ WindUI:Notify({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "飞车",
     Desc = "",
     Locked = false,
