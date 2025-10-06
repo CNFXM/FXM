@@ -107,9 +107,9 @@ local Tabs = {
 }
 
 local TabHandles = {
-    GGXX1 = Tabs.JBGG:Tab({ Title = "公告区域", Icon = "layout-grid" }),
-    GGXX2 = Tabs.JBGG:Tab({ Title = "更新区域", Icon = "layout-grid" }),
-    GGXX3 = Tabs.JBGG:Tab({ Title = "信息区域", Icon = "layout-grid" }),
+    GGXX1 = Tabs.GGXX:Tab({ Title = "公告区域", Icon = "layout-grid" }),
+    GGXX2 = Tabs.GGXX:Tab({ Title = "更新区域", Icon = "layout-grid" }),
+    GGXX3 = Tabs.GGXX:Tab({ Title = "信息区域", Icon = "layout-grid" }),
     UI = Tabs.UI:Tab({ Title = "UI区域", Icon = "layout-grid" }),
     JBGJHZ = Tabs.JBGJHZ:Tab({ Title = "工具区域", Icon = "layout-grid" }),
     YI = Tabs.Main:Tab({ Title = "调节区域", Icon = "layout-grid" }),
