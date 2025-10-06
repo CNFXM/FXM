@@ -1159,42 +1159,63 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "穿墙", 
     Value = false, 
     Callback = function(Value)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        
-        -- 创建碰撞组
-        local physicsService = game:GetService("PhysicsService")
-        local noclipGroup = "NoclipGroup"
-        local defaultGroup = "Default"
-        
-        -- 确保碰撞组存在
-        if not physicsService:GetCollisionGroupName(noclipGroup) then
-            physicsService:CreateCollisionGroup(noclipGroup)
-            physicsService:CollisionGroupSetCollidable(noclipGroup, defaultGroup, false)
+        local Workspace = game:GetService("Workspace")
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+
+        local Plr = Players.LocalPlayer
+        local SteppedConnection = nil -- 存储循环连接，用于关闭时断开
+
+        -- 先断开已有连接（避免重复创建循环）
+        if SteppedConnection then
+            SteppedConnection:Disconnect()
         end
-        
-        if Value then
-            -- 开启穿墙
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    physicsService:SetPartCollisionGroup(part, noclipGroup)
-                end
+
+        if Value then -- 开启穿墙
+            if not Plr.Character then
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "角色未加载，无法开启穿墙",
+                    Duration = 3,
+                    Icon = "layout-grid",
+                })
+                return
             end
-            
-            -- 监听新加入的部件
-            character.DescendantAdded:Connect(function(descendant)
-                if descendant:IsA("BasePart") then
-                    physicsService:SetPartCollisionGroup(descendant, noclipGroup)
+
+            -- 循环设置角色部件碰撞为false
+            SteppedConnection = RunService.Stepped:Connect(function()
+                if not Plr.Character or not Value then
+                    SteppedConnection:Disconnect()
+                    return
+                end
+                for _, v in pairs(Plr.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
                 end
             end)
-        else
-            -- 关闭穿墙
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    physicsService:SetPartCollisionGroup(part, defaultGroup)
+        else -- 关闭穿墙
+            -- 断开循环
+            if SteppedConnection then
+                SteppedConnection:Disconnect()
+            end
+            -- 恢复角色碰撞（可选，按需保留）
+            if Plr.Character then
+                for _, v in pairs(Plr.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
                 end
             end
         end
+
+        -- 状态切换通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "开启成功" or "关闭成功",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
     end
 })
 
@@ -1202,12 +1223,44 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "无限跳", 
     Value = false, 
     Callback = function(Value)
-Jump = Value
-        game.UserInputService.JumpRequest:Connect(function()
-            if Jump then
-                game.Players.LocalPlayer.Character.Humanoid:ChangeState("Jumping")
-            end
-        end)
+        local Players = game:GetService("Players")
+        local UserInputService = game:GetService("UserInputService")
+        
+        local Plr = Players.LocalPlayer
+        local Jump = Value -- 无限跳状态
+        local JumpConn = nil -- 存储输入连接，用于切换时断开
+        
+        -- 每次切换状态前，先断开之前的JumpRequest连接（关键修复）
+        if JumpConn then
+            JumpConn:Disconnect()
+        end
+
+        -- 若角色未加载，不执行后续逻辑（避免报错）
+        if not Plr.Character then
+            warn("角色未加载，无法启用无限跳")
+            return
+        end
+        local Humanoid = Plr.Character:FindFirstChildOfClass("Humanoid")
+        if not Humanoid then return end
+
+        -- 状态为true（开启）时，绑定跳跃请求
+        if Jump then
+            JumpConn = UserInputService.JumpRequest:Connect(function()
+                -- 防止角色消失/人形失效导致的报错
+                if Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") then
+                    Plr.Character.Humanoid:ChangeState("Jumping")
+                end
+            end)
+        end
+
+        -- （可选）状态切换通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "无限跳已开启" or "无限跳已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
@@ -1235,35 +1288,45 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "人物燃尽[假延迟]", 
     Value = false, 
     Callback = function(Value)
-local fakeLagEnabled = Value
-    local fakeLagThread
+        -- 假延迟核心变量（放在Toggle回调内，确保开关状态绑定）
+        local fakeLagEnabled = Value
+        local fakeLagThread
 
-    -- 假延迟执行函数（通过锚定HumanoidRootPart制造卡顿）
-    local function toggleFakeLag()
-        local lp = game:GetService("Players").LocalPlayer
-        -- 仅在开关开启（Value=true）时循环执行
-        while fakeLagEnabled do
-            task.wait()
-            local character = lp.Character
-            if character then
-                local hrp = character:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.Anchored = true -- 锚定（卡住）
-                    task.wait(0.2) -- 卡顿持续时间
-                    hrp.Anchored = false -- 取消锚定（恢复）
-                    task.wait()
+        -- 假延迟执行函数（通过锚定HumanoidRootPart制造卡顿）
+        local function toggleFakeLag()
+            local lp = game:GetService("Players").LocalPlayer
+            -- 仅在开关开启（Value=true）时循环执行
+            while fakeLagEnabled do
+                task.wait()
+                local character = lp.Character
+                if character then
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Anchored = true -- 锚定（卡住）
+                        task.wait(0.2) -- 卡顿持续时间
+                        hrp.Anchored = false -- 取消锚定（恢复）
+                        task.wait()
+                    end
                 end
             end
         end
-    end
 
-    -- 开关开启：启动假延迟协程
-    if fakeLagEnabled then
-        fakeLagThread = coroutine.create(toggleFakeLag)
-        coroutine.resume(fakeLagThread)
-    else
-        -- 开关关闭：停止循环（通过修改变量让while循环退出）
-        fakeLagEnabled = false
+        -- 开关开启：启动假延迟协程
+        if fakeLagEnabled then
+            fakeLagThread = coroutine.create(toggleFakeLag)
+            coroutine.resume(fakeLagThread)
+        else
+            -- 开关关闭：停止循环（通过修改变量让while循环退出）
+            fakeLagEnabled = false
+        end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "假延迟已开启" or "假延迟已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
     end
 })
 
@@ -1271,112 +1334,143 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "布娃娃模式", 
     Value = false, 
     Callback = function(Value)
-local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
 
-    local isRagdolled = Value
-    local motorBackup = {}
+        local isRagdolled = Value
+        local motorBackup = {}
 
-    local function getCharacter()
-        return player.Character or player.CharacterAdded:Wait()
-    end
+        local function getCharacter()
+            return player.Character or player.CharacterAdded:Wait()
+        end
 
-    local function toggleRagdoll()
-        local character = getCharacter()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if not humanoid or humanoid.Health <= 0 then return end
+        local function toggleRagdoll()
+            local character = getCharacter()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if not humanoid or humanoid.Health <= 0 then return end
 
-        local root = character:FindFirstChild("HumanoidRootPart")
-        if not root then return end
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if not root then return end
 
-        if isRagdolled then
-            -- 开启布娃娃：保留原逻辑
-            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-            humanoid.AutoRotate = false
-            motorBackup = {}
+            if isRagdolled then
+                -- 开启布娃娃：保留原逻辑
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                humanoid.AutoRotate = false
+                motorBackup = {}
 
-            for _, joint in ipairs(character:GetDescendants()) do
-                if joint:IsA("Motor6D") then
-                    local socket = Instance.new("BallSocketConstraint")
-                    local a1 = Instance.new("Attachment")
-                    local a2 = Instance.new("Attachment")
+                for _, joint in ipairs(character:GetDescendants()) do
+                    if joint:IsA("Motor6D") then
+                        local socket = Instance.new("BallSocketConstraint")
+                        local a1 = Instance.new("Attachment")
+                        local a2 = Instance.new("Attachment")
 
-                    a1.CFrame = joint.C0
-                    a2.CFrame = joint.C1
-                    a1.Parent = joint.Part0
-                    a2.Parent = joint.Part1
+                        a1.CFrame = joint.C0
+                        a2.CFrame = joint.C1
+                        a1.Parent = joint.Part0
+                        a2.Parent = joint.Part1
 
-                    socket.Attachment0 = a1
-                    socket.Attachment1 = a2
-                    socket.Parent = joint.Parent
-                    socket.LimitsEnabled = true
-                    socket.TwistLimitsEnabled = true
+                        socket.Attachment0 = a1
+                        socket.Attachment1 = a2
+                        socket.Parent = joint.Parent
+                        socket.LimitsEnabled = true
+                        socket.TwistLimitsEnabled = true
 
-                    motorBackup[joint.Name .. "_" .. joint:GetFullName()] = {
-                        Part0 = joint.Part0,
-                        Part1 = joint.Part1,
-                        C0 = joint.C0,
-                        C1 = joint.C1,
-                        Parent = joint.Parent,
-                    }
+                        motorBackup[joint.Name .. "_" .. joint:GetFullName()] = {
+                            Part0 = joint.Part0,
+                            Part1 = joint.Part1,
+                            C0 = joint.C0,
+                            C1 = joint.C1,
+                            Parent = joint.Parent,
+                        }
 
-                    joint:Destroy()
+                        joint:Destroy()
+                    end
                 end
-            end
 
-            root.Velocity = Vector3.new(0, 15, 0)
+                root.Velocity = Vector3.new(0, 15, 0)
 
-        else
-            -- 关闭布娃娃：仅恢复关节+清理约束，删除“重置人物（GettingUp）”相关代码
-            for _, data in pairs(motorBackup) do
-                local motor = Instance.new("Motor6D")
-                motor.Name = "RestoredMotor"
-                motor.Part0 = data.Part0
-                motor.Part1 = data.Part1
-                motor.C0 = data.C0
-                motor.C1 = data.C1
-                motor.Parent = data.Parent
-            end
-            motorBackup = {}
+            else
+                -- 关闭布娃娃：仅恢复关节+清理约束，删除“重置人物（GettingUp）”相关代码
+                for _, data in pairs(motorBackup) do
+                    local motor = Instance.new("Motor6D")
+                    motor.Name = "RestoredMotor"
+                    motor.Part0 = data.Part0
+                    motor.Part1 = data.Part1
+                    motor.C0 = data.C0
+                    motor.C1 = data.C1
+                    motor.Parent = data.Parent
+                end
+                motorBackup = {}
 
-            -- 【核心修改】删除这行：不再让人物自动起身（去掉GettingUp状态切换）
-            -- humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-            humanoid.AutoRotate = true -- 仅保留自动旋转恢复
+                -- 【核心修改】删除这行：不再让人物自动起身（去掉GettingUp状态切换）
+                -- humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                humanoid.AutoRotate = true -- 仅保留自动旋转恢复
 
-            -- 清理残留约束和附件（保留原逻辑）
-            for _, item in ipairs(character:GetDescendants()) do
-                if item:IsA("BallSocketConstraint") or item:IsA("Attachment") then
-                    item:Destroy()
+                -- 清理残留约束和附件（保留原逻辑）
+                for _, item in ipairs(character:GetDescendants()) do
+                    if item:IsA("BallSocketConstraint") or item:IsA("Attachment") then
+                        item:Destroy()
+                    end
                 end
             end
         end
+
+        player.CharacterAdded:Connect(function(char)
+            isRagdolled = false
+            motorBackup = {}
+        end)
+
+        toggleRagdoll()
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "布娃娃模式已开启" or "布娃娃模式已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
     end
-
-    player.CharacterAdded:Connect(function(char)
-        isRagdolled = false
-        motorBackup = {}
-    end)
-
-    toggleRagdoll()
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
     Title = "自动交互", 
     Value = false, 
     Callback = function(state)
-if state then
+        local autoInteract = false
+        local interactThread -- 存储循环线程，避免重复创建
+
+        -- 停止旧线程（防止开关切换后残留循环）
+        if interactThread then
+            autoInteract = false
+            task.wait() -- 等待旧循环退出
+        end
+
+        if state then
             autoInteract = true
-            while autoInteract do
-                for _, descendant in pairs(workspace:GetDescendants()) do
-                    if descendant:IsA("ProximityPrompt") then
-                        fireproximityprompt(descendant)
+            -- 启动自动交互循环
+            interactThread = task.spawn(function()
+                while autoInteract do
+                    -- 遍历工作区所有子对象，触发所有ProximityPrompt
+                    for _, descendant in pairs(workspace:GetDescendants()) do
+                        if descendant:IsA("ProximityPrompt") then
+                            fireproximityprompt(descendant)
+                        end
                     end
+                    task.wait(0.25) -- 交互间隔（可按需调整）
                 end
-                task.wait(0.25) -- Adjust the wait time as needed
-            end
+            end)
         else
             autoInteract = false
         end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = state and "自动交互已开启" or "自动交互已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
@@ -2317,165 +2411,771 @@ WindUI:Notify({
     end
 })
 ---------------------------------------------------------------------------------------------透视ESP
--- 初始化全局透视控制变量（避免未定义错误）
-getgenv().ESPEnabled = getgenv().ESPEnabled or false
-getgenv().ShowSkeleton = getgenv().ShowSkeleton or false
-getgenv().ShowBox = getgenv().ShowBox or false
-getgenv().ShowTracer = getgenv().ShowTracer or false
-getgenv().ShowName = getgenv().ShowName or false
--- 全局骨骼存储表（用于统一管理骨骼实例）
-_G.Skeletons = _G.Skeletons or {}
--- 预加载骨骼库（避免重复 HttpGet，提升性能）
-local SkeletonLibrary = SkeletonLibrary or loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
+getgenv().ESPEnabled = false
+getgenv().ShowBox = false
+getgenv().ShowHealth = false
+getgenv().ShowName = false
+getgenv().ShowDistance = false
+getgenv().ShowTracer = false
+getgenv().TeamCheck = false
+getgenv().ShowSkeleton = false
+getgenv().ShowRadar = false
+getgenv().ShowPlayerCount = false
+getgenv().ShowWeapon = false
+getgenv().ShowFOV = false
+getgenv().OutOfViewArrows = false
+getgenv().Chams = false
 
--- 1. 总透视开关（控制整体功能启用/禁用）
-local MainESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "透视开启", 
-    Value = getgenv().ESPEnabled, -- 初始状态同步全局变量
-    Callback = function(Value)
-        getgenv().ESPEnabled = Value -- 更新全局控制变量
-        -- 发送功能状态通知
-        WindUI:Notify({
-            Title = "透视总开关",
-            Content = Value and "全局透视已开启" or "全局透视已关闭",
-            Duration = 3,
-            Icon = "eye",
-        })
+getgenv().TracerColor = Color3.new(1, 0, 0)
+getgenv().SkeletonColor = Color3.new(0.2, 0.8, 1)
+getgenv().BoxColor = Color3.new(1, 1, 1)
+getgenv().HealthBarColor = Color3.new(0, 1, 0)
+getgenv().HealthTextColor = Color3.new(1, 1, 1)
+getgenv().NameColor = Color3.new(1, 1, 1)
+getgenv().DistanceColor = Color3.new(1, 1, 0)
+getgenv().WeaponColor = Color3.new(1, 0.5, 0)
+getgenv().ArrowColor = Color3.new(1, 0, 0)
+getgenv().FOVColor = Color3.new(1, 1, 1)
+getgenv().ChamsColor = Color3.new(1, 0, 0)
+
+getgenv().BoxThickness = 1
+getgenv().TracerThickness = 1
+getgenv().SkeletonThickness = 2
+getgenv().FOVRadius = 100
+getgenv().ArrowSize = 15
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local function getGradientColor(time)
+    local r = math.sin(time * 2) * 0.5 + 0.5
+    local g = math.sin(time * 3) * 0.5 + 0.5
+    local b = math.sin(time * 4) * 0.5 + 0.5
+    return Color3.new(r, g, b)
+end
+
+local playerCountText = Drawing.new("Text")
+playerCountText.Visible = false
+playerCountText.Color = Color3.new(1, 1, 1)
+playerCountText.Size = 20
+playerCountText.Font = Drawing.Fonts.Monospace
+playerCountText.Outline = true
+playerCountText.OutlineColor = Color3.new(0, 0, 0)
+playerCountText.Position = Vector2.new(Camera.ViewportSize.X / 2, 10)
+
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = false
+fovCircle.Color = getgenv().FOVColor
+fovCircle.Thickness = 1
+fovCircle.Filled = false
+fovCircle.Radius = getgenv().FOVRadius
+fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+local function updatePlayerCount()
+    local playerCount = #Players:GetPlayers()
+    playerCountText.Text = "在线玩家: " .. playerCount
+    playerCountText.Visible = getgenv().ESPEnabled and getgenv().ShowPlayerCount
+
+    local time = tick()
+    playerCountText.Color = getGradientColor(time)
+end
+
+local function updateFOV()
+    fovCircle.Visible = getgenv().ShowFOV
+    fovCircle.Color = getgenv().FOVColor
+    fovCircle.Radius = getgenv().FOVRadius
+    fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+end
+
+local ESPComponents = {}
+
+local function createESP(player)
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = getgenv().BoxColor
+    box.Thickness = getgenv().BoxThickness
+    box.Filled = false
+
+    local healthBar = Drawing.new("Square")
+    healthBar.Visible = false
+    healthBar.Color = getgenv().HealthBarColor
+    healthBar.Thickness = 1
+    healthBar.Filled = true
+
+    local healthBarBackground = Drawing.new("Square")
+    healthBarBackground.Visible = false
+    healthBarBackground.Color = Color3.new(0, 0, 0)
+    healthBarBackground.Transparency = 0.5
+    healthBarBackground.Thickness = 1
+    healthBarBackground.Filled = true
+
+    local healthBarBorder = Drawing.new("Square")
+    healthBarBorder.Visible = false
+    healthBarBorder.Color = Color3.new(1, 1, 1)
+    healthBarBorder.Thickness = 1
+    healthBarBorder.Filled = false
+
+    local healthText = Drawing.new("Text")
+    healthText.Visible = false
+    healthText.Color = getgenv().HealthTextColor
+    healthText.Size = 14
+    healthText.Font = Drawing.Fonts.Monospace
+    healthText.Outline = true
+    healthText.OutlineColor = Color3.new(0, 0, 0)
+
+    local nameText = Drawing.new("Text")
+    nameText.Visible = false
+    nameText.Color = getgenv().NameColor
+    nameText.Size = 16
+    nameText.Font = Drawing.Fonts.Monospace
+    nameText.Outline = true
+    nameText.OutlineColor = Color3.new(0, 0, 0)
+
+    local distanceText = Drawing.new("Text")
+    distanceText.Visible = false
+    distanceText.Color = getgenv().DistanceColor
+    distanceText.Size = 14
+    distanceText.Font = Drawing.Fonts.Monospace
+    distanceText.Outline = true
+    distanceText.OutlineColor = Color3.new(0, 0, 0)
+
+    local weaponText = Drawing.new("Text")
+    weaponText.Visible = false
+    weaponText.Color = getgenv().WeaponColor
+    weaponText.Size = 14
+    weaponText.Font = Drawing.Fonts.Monospace
+    weaponText.Outline = true
+    weaponText.OutlineColor = Color3.new(0, 0, 0)
+
+    local tracer = Drawing.new("Line")
+    tracer.Visible = false
+    tracer.Color = getgenv().TracerColor
+    tracer.Thickness = getgenv().TracerThickness
+
+    local arrow = Drawing.new("Triangle")
+    arrow.Visible = false
+    arrow.Color = getgenv().ArrowColor
+    arrow.Filled = true
+    arrow.Thickness = 1
+
+    local skeletonLines = {}
+    local skeletonPoints = {}
+
+    local function createSkeleton()
+        for i = 1, 15 do
+            skeletonLines[i] = Drawing.new("Line")
+            skeletonLines[i].Visible = false
+            skeletonLines[i].Color = getgenv().SkeletonColor
+            skeletonLines[i].Thickness = getgenv().SkeletonThickness
+        end
+
+        skeletonPoints["Head"] = Drawing.new("Circle")
+        skeletonPoints["Head"].Visible = false
+        skeletonPoints["Head"].Color = Color3.new(1, 0.5, 0)
+        skeletonPoints["Head"].Thickness = 2
+        skeletonPoints["Head"].Filled = true
+        skeletonPoints["Head"].Radius = 4
     end
-})
 
--- 2. 模型透视开关（基础模型穿透显示）
-local ModelESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "模型透视", 
-    Value = getgenv().ShowSkeleton, -- 初始状态同步全局变量
-    Callback = function(Value)
-        getgenv().ShowSkeleton = Value -- 更新全局控制变量
-        -- 发送功能状态通知
-        WindUI:Notify({
-            Title = "模型透视",
-            Content = Value and "模型透视已开启" or "模型透视已关闭",
-            Duration = 3,
-            Icon = "cube",
-        })
-    end
-})
+    createSkeleton()
 
--- 3. 方框透视开关（绘制玩家包围盒）
-local BoxESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "方框透视", 
-    Value = getgenv().ShowBox, -- 初始状态同步全局变量
-    Callback = function(Value)
-        getgenv().ShowBox = Value -- 更新全局控制变量
-        -- 发送功能状态通知
-        WindUI:Notify({
-            Title = "方框透视",
-            Content = Value and "方框透视已开启" or "方框透视已关闭",
-            Duration = 3,
-            Icon = "square-outline",
-        })
-    end
-})
+    local lastHealth = 100
+    local healthChangeTime = 0
+    local smoothHealth = 100
 
--- 4. 透视骨骼开关（精细化骨骼绘制，含资源管理）
-local SkeletonESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "透视骨骼",
-    Value = getgenv().ShowSkeleton, -- 初始状态同步全局变量
-    Callback = function(state) 
-        getgenv().ShowSkeleton = state -- 更新全局控制变量
+    ESPComponents[player] = {
+        box = box,
+        healthBar = healthBar,
+        healthBarBackground = healthBarBackground,
+        healthBarBorder = healthBarBorder,
+        healthText = healthText,
+        nameText = nameText,
+        distanceText = distanceText,
+        weaponText = weaponText,
+        tracer = tracer,
+        arrow = arrow,
+        skeletonLines = skeletonLines,
+        skeletonPoints = skeletonPoints
+    }
 
-        if state then -- 开关开启：创建骨骼实例
-            -- 为已存在的非本地玩家创建骨骼
-            for _, Player in ipairs(game.Players:GetPlayers()) do
-                if Player ~= game.Players.LocalPlayer then
-                    -- 防护：避免重复创建同一玩家骨骼
-                    local isExist = table.find(_G.Skeletons, function(ske)
-                        return ske and ske.Player == Player
-                    end)
-                    if not isExist then
-                        local newSkeleton = SkeletonLibrary:NewSkeleton(Player, true)
-                        table.insert(_G.Skeletons, newSkeleton)
+    RunService.RenderStepped:Connect(function()
+        if not getgenv().ESPEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") or not player.Character:FindFirstChild("Humanoid") or player == LocalPlayer then
+            box.Visible = false
+            healthBar.Visible = false
+            healthBarBackground.Visible = false
+            healthBarBorder.Visible = false
+            healthText.Visible = false
+            nameText.Visible = false
+            distanceText.Visible = false
+            weaponText.Visible = false
+            tracer.Visible = false
+            arrow.Visible = false
+            for _, line in pairs(skeletonLines) do
+                line.Visible = false
+            end
+            for _, point in pairs(skeletonPoints) do
+                point.Visible = false
+            end
+            return
+        end
+
+        if getgenv().TeamCheck and player.Team == LocalPlayer.Team then
+            box.Visible = false
+            healthBar.Visible = false
+            healthBarBackground.Visible = false
+            healthBarBorder.Visible = false
+            healthText.Visible = false
+            nameText.Visible = false
+            distanceText.Visible = false
+            weaponText.Visible = false
+            tracer.Visible = false
+            arrow.Visible = false
+            for _, line in pairs(skeletonLines) do
+                line.Visible = false
+            end
+            for _, point in pairs(skeletonPoints) do
+                point.Visible = false
+            end
+            return
+        end
+
+        local character = player.Character
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChild("Humanoid")
+
+        if rootPart and humanoid and humanoid.Health > 0 then
+            local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+            local headPos, _ = Camera:WorldToViewportPoint(rootPart.Position + Vector3.new(0, 3, 0))
+            local legPos, _ = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
+
+            local weaponName = "无武器"
+            for _, tool in ipairs(character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    weaponName = tool.Name
+                    break
+                end
+            end
+
+            if getgenv().ShowBox and onScreen then
+                box.Size = Vector2.new(1000 / rootPos.Z, headPos.Y - legPos.Y)
+                box.Position = Vector2.new(rootPos.X - box.Size.X / 2, rootPos.Y - box.Size.Y / 2)
+                box.Visible = true
+                box.Color = getgenv().BoxColor
+                box.Thickness = getgenv().BoxThickness
+            else
+                box.Visible = false
+            end
+
+            if getgenv().ShowHealth and onScreen then
+                local healthPercentage = humanoid.Health / humanoid.MaxHealth
+                local barWidth = 50
+                local barHeight = 5
+                local barX = headPos.X - barWidth / 2
+                local barY = headPos.Y - 20
+
+                healthBarBackground.Size = Vector2.new(barWidth, barHeight)
+                healthBarBackground.Position = Vector2.new(barX, barY)
+                healthBarBackground.Visible = true
+
+                healthBarBorder.Size = Vector2.new(barWidth, barHeight)
+                healthBarBorder.Position = Vector2.new(barX, barY)
+                healthBarBorder.Visible = true
+
+                smoothHealth = smoothHealth + (humanoid.Health - smoothHealth) * 0.1
+                local smoothHealthPercentage = smoothHealth / humanoid.MaxHealth
+
+                healthBar.Size = Vector2.new(barWidth * smoothHealthPercentage, barHeight)
+                healthBar.Position = Vector2.new(barX, barY)
+
+                if smoothHealthPercentage >= 0.8 then
+                    healthBar.Color = Color3.new(0, 1, 0)
+                elseif smoothHealthPercentage >= 0.5 then
+                    healthBar.Color = Color3.new(1, 1, 0)
+                elseif smoothHealthPercentage >= 0.2 then
+                    healthBar.Color = Color3.new(1, 0.5, 0)
+                else
+                    healthBar.Color = Color3.new(1, 0, 0)
+                end
+
+                healthBar.Visible = true
+
+                if humanoid.Health ~= lastHealth then
+                    healthChangeTime = tick()
+                    lastHealth = humanoid.Health
+                end
+
+                if tick() - healthChangeTime < 0.5 then
+                    healthBar.Color = Color3.new(1, 0, 0)
+                end
+
+                healthText.Position = Vector2.new(barX + barWidth + 5, barY - 5)
+                healthText.Text = math.floor(humanoid.Health) .. "/" .. math.floor(humanoid.MaxHealth)
+                healthText.Visible = true
+            else
+                healthBar.Visible = false
+                healthBarBackground.Visible = false
+                healthBarBorder.Visible = false
+                healthText.Visible = false
+            end
+
+            if getgenv().ShowName and onScreen then
+                nameText.Position = Vector2.new(headPos.X, headPos.Y - 35)
+                nameText.Text = player.Name
+                nameText.Visible = true
+
+                if getgenv().ShowDistance then
+                    local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                    distanceText.Position = Vector2.new(headPos.X, headPos.Y + 10)
+                    distanceText.Text = math.floor(distance) .. "m"
+                    distanceText.Visible = true
+                else
+                    distanceText.Visible = false
+                end
+                
+                if getgenv().ShowWeapon then
+                    weaponText.Position = Vector2.new(headPos.X, headPos.Y - 50)
+                    weaponText.Text = weaponName
+                    weaponText.Visible = true
+                else
+                    weaponText.Visible = false
+                end
+            else
+                nameText.Visible = false
+                distanceText.Visible = false
+                weaponText.Visible = false
+            end
+
+            if getgenv().ShowTracer then
+                local head = character:FindFirstChild("Head")
+                if head then
+                    local headPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                    if onScreen then
+                        tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                        tracer.To = Vector2.new(headPos.X, headPos.Y)
+                        tracer.Visible = true
+                        tracer.Color = getgenv().TracerColor
+                        tracer.Thickness = getgenv().TracerThickness
+                        
+                        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                        if distance < 20 then
+                            tracer.Color = Color3.new(0, 1, 0)
+                        elseif distance < 50 then
+                            tracer.Color = Color3.new(1, 1, 0) 
+                        else
+                            tracer.Color = getgenv().TracerColor 
+                        end
+                    else
+                        tracer.Visible = false
+                    end
+                else
+                    tracer.Visible = false
+                end
+            else
+                tracer.Visible = false
+            end
+
+            if getgenv().OutOfViewArrows and not onScreen then
+                local direction = (rootPart.Position - Camera.CFrame.Position).Unit
+                local dotProduct = Camera.CFrame.RightVector:Dot(direction)
+                local crossProduct = Camera.CFrame.RightVector:Cross(direction)
+                
+                local screenPosition = Vector2.new(
+                    Camera.ViewportSize.X / 2 + dotProduct * Camera.ViewportSize.X / 3,
+                    Camera.ViewportSize.Y / 2 - crossProduct.Y * Camera.ViewportSize.Y / 3
+                )
+                
+                screenPosition = Vector2.new(
+                    math.clamp(screenPosition.X, getgenv().ArrowSize, Camera.ViewportSize.X - getgenv().ArrowSize),
+                    math.clamp(screenPosition.Y, getgenv().ArrowSize, Camera.ViewportSize.Y - getgenv().ArrowSize)
+                )
+                
+                local angle = math.atan2(screenPosition.Y - Camera.ViewportSize.Y / 2, screenPosition.X - Camera.ViewportSize.X / 2)
+                
+                arrow.PointA = screenPosition
+                arrow.PointB = Vector2.new(
+                    screenPosition.X - getgenv().ArrowSize * math.cos(angle - 0.5),
+                    screenPosition.Y - getgenv().ArrowSize * math.sin(angle - 0.5)
+                )
+                arrow.PointC = Vector2.new(
+                    screenPosition.X - getgenv().ArrowSize * math.cos(angle + 0.5),
+                    screenPosition.Y - getgenv().ArrowSize * math.sin(angle + 0.5)
+                )
+                
+                arrow.Color = getgenv().ArrowColor
+                arrow.Visible = true
+            else
+                arrow.Visible = false
+            end
+
+            if getgenv().ShowSkeleton and onScreen then
+                local head = character:FindFirstChild("Head")
+                local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+                local leftArm = character:FindFirstChild("Left Arm") or character:FindFirstChild("LeftUpperArm")
+                local rightArm = character:FindFirstChild("Right Arm") or character:FindFirstChild("RightUpperArm")
+                local leftLeg = character:FindFirstChild("Left Leg") or character:FindFirstChild("LeftUpperLeg")
+                local rightLeg = character:FindFirstChild("Right Leg") or character:FindFirstChild("RightUpperLeg")
+                
+                if head and torso and leftArm and rightArm and leftLeg and rightLeg then
+                    local headPos = Camera:WorldToViewportPoint(head.Position)
+                    local torsoPos = Camera:WorldToViewportPoint(torso.Position)
+                    local leftArmPos = Camera:WorldToViewportPoint(leftArm.Position)
+                    local rightArmPos = Camera:WorldToViewportPoint(rightArm.Position)
+                    local leftLegPos = Camera:WorldToViewportPoint(leftLeg.Position)
+                    local rightLegPos = Camera:WorldToViewportPoint(rightLeg.Position)
+
+                    skeletonPoints["Head"].Position = Vector2.new(headPos.X, headPos.Y)
+                    skeletonPoints["Head"].Visible = true
+
+                    skeletonLines[1].From = Vector2.new(headPos.X, headPos.Y)
+                    skeletonLines[1].To = Vector2.new(torsoPos.X, torsoPos.Y) 
+                    skeletonLines[1].Visible = true
+
+                    skeletonLines[2].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                    skeletonLines[2].To = Vector2.new(leftArmPos.X, leftArmPos.Y)
+                    skeletonLines[2].Visible = true
+
+                    skeletonLines[3].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                    skeletonLines[3].To = Vector2.new(rightArmPos.X, rightArmPos.Y)
+                    skeletonLines[3].Visible = true
+
+                    skeletonLines[4].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                    skeletonLines[4].To = Vector2.new(leftLegPos.X, leftLegPos.Y)
+                    skeletonLines[4].Visible = true
+
+                    skeletonLines[5].From = Vector2.new(torsoPos.X, torsoPos.Y)
+                    skeletonLines[5].To = Vector2.new(rightLegPos.X, rightLegPos.Y)
+                    skeletonLines[5].Visible = true
+                    
+                    if character:FindFirstChild("LeftLowerArm") then
+                        local leftLowerArmPos = Camera:WorldToViewportPoint(character.LeftLowerArm.Position)
+                        skeletonLines[6].From = Vector2.new(leftArmPos.X, leftArmPos.Y)
+                        skeletonLines[6].To = Vector2.new(leftLowerArmPos.X, leftLowerArmPos.Y)
+                        skeletonLines[6].Visible = true
+                    end
+
+                    if character:FindFirstChild("RightLowerArm") then
+                        local rightLowerArmPos = Camera:WorldToViewportPoint(character.RightLowerArm.Position)
+                        skeletonLines[7].From = Vector2.new(rightArmPos.X, rightArmPos.Y)
+                        skeletonLines[7].To = Vector2.new(rightLowerArmPos.X, rightLowerArmPos.Y)
+                        skeletonLines[7].Visible = true
+                    end
+
+                    if character:FindFirstChild("LeftLowerLeg") then
+                        local leftLowerLegPos = Camera:WorldToViewportPoint(character.LeftLowerLeg.Position)
+                        skeletonLines[8].From = Vector2.new(leftLegPos.X, leftLegPos.Y)
+                        skeletonLines[8].To = Vector2.new(leftLowerLegPos.X, leftLowerLegPos.Y)
+                        skeletonLines[8].Visible = true
+                    end
+
+                    if character:FindFirstChild("RightLowerLeg") then
+                        local rightLowerLegPos = Camera:WorldToViewportPoint(character.RightLowerLeg.Position)
+                        skeletonLines[9].From = Vector2.new(rightLegPos.X, rightLegPos.Y)
+                        skeletonLines[9].To = Vector2.new(rightLowerLegPos.X, rightLowerLegPos.Y)
+                        skeletonLines[9].Visible = true
+                    end
+                else
+                    for _, line in pairs(skeletonLines) do
+                        line.Visible = false
+                    end
+                    for _, point in pairs(skeletonPoints) do
+                        point.Visible = false
                     end
                 end
-            end
-
-            -- 监听新玩家加入，自动创建骨骼
-            local playerAddedConn = game.Players.PlayerAdded:Connect(function(Player)
-                if Player ~= game.Players.LocalPlayer then
-                    task.wait(1) -- 等待玩家模型加载完成
-                    local newSkeleton = SkeletonLibrary:NewSkeleton(Player, true)
-                    table.insert(_G.Skeletons, newSkeleton)
+            else
+                for _, line in pairs(skeletonLines) do
+                    line.Visible = false
                 end
-            end)
-            -- 存储连接，便于后续销毁
-            _G.SkeletonPlayerAddedConn = playerAddedConn
-
-            -- 开启通知
-            WindUI:Notify({
-                Title = "通知",
-                Content = "透视骨骼已开启",
-                Duration = 3,
-                Icon = "layout-grid",
-            })
-        else -- 开关关闭：销毁骨骼+清理资源
-            -- 销毁所有骨骼实例
-            for i, skeleton in ipairs(_G.Skeletons) do
-                if skeleton and skeleton.Destroy then
-                    skeleton:Destroy()
+                for _, point in pairs(skeletonPoints) do
+                    point.Visible = false
                 end
             end
-            -- 清空骨骼存储表
-            table.clear(_G.Skeletons)
-            -- 断开玩家加入监听（避免内存泄漏）
-            if _G.SkeletonPlayerAddedConn then
-                _G.SkeletonPlayerAddedConn:Disconnect()
-                _G.SkeletonPlayerAddedConn = nil
+        else
+            box.Visible = false
+            healthBar.Visible = false
+            healthBarBackground.Visible = false
+            healthBarBorder.Visible = false
+            healthText.Visible = false
+            nameText.Visible = false
+            distanceText.Visible = false
+            weaponText.Visible = false
+            tracer.Visible = false
+            arrow.Visible = false
+            for _, line in pairs(skeletonLines) do
+                line.Visible = false
             end
+            for _, point in pairs(skeletonPoints) do
+                point.Visible = false
+            end
+        end
+    end)
+end
 
-            -- 关闭通知
-            WindUI:Notify({
-                Title = "通知",
-                Content = "透视骨骼已关闭",
-                Duration = 3,
-                Icon = "layout-grid",
-            })
+local radar = Drawing.new("Circle")
+radar.Visible = false
+radar.Color = Color3.new(1, 1, 1)
+radar.Thickness = 2
+radar.Filled = false
+radar.Radius = 100
+radar.Position = Vector2.new(Camera.ViewportSize.X - 120, 120)
+
+local radarCenter = Drawing.new("Circle")
+radarCenter.Visible = false
+radarCenter.Color = Color3.new(1, 1, 1)
+radarCenter.Thickness = 2
+radarCenter.Filled = true
+radarCenter.Radius = 3
+radarCenter.Position = radar.Position
+
+local radarDirection = Drawing.new("Line")
+radarDirection.Visible = false
+radarDirection.Color = Color3.new(1, 1, 1)
+radarDirection.Thickness = 2
+
+local radarGridLines = {}
+for i = 1, 4 do
+    radarGridLines[i] = Drawing.new("Line")
+    radarGridLines[i].Visible = false
+    radarGridLines[i].Color = Color3.new(0.5, 0.5, 0.5)
+    radarGridLines[i].Thickness = 1
+end
+
+local radarRangeText = Drawing.new("Text")
+radarRangeText.Visible = false
+radarRangeText.Color = Color3.new(1, 1, 1)
+radarRangeText.Size = 14
+radarRangeText.Font = Drawing.Fonts.Monospace
+radarRangeText.Outline = true
+radarRangeText.OutlineColor = Color3.new(0, 0, 0)
+radarRangeText.Text = "100m"
+
+local radarPlayers = {}
+
+local function updateRadar()
+    if not getgenv().ShowRadar then
+        radar.Visible = false
+        radarCenter.Visible = false
+        radarDirection.Visible = false
+        radarRangeText.Visible = false
+        
+        for _, line in pairs(radarGridLines) do
+            line.Visible = false
+        end
+        
+        for _, player in pairs(radarPlayers) do
+            if player.dot then player.dot.Visible = false end
+            if player.direction then player.direction.Visible = false end
+            if player.name then player.name.Visible = false end
+        end
+        return
+    end
+
+    radar.Visible = true
+    radarCenter.Visible = true
+    radarDirection.Visible = true
+    radarRangeText.Visible = true
+    
+    radarRangeText.Position = Vector2.new(radar.Position.X, radar.Position.Y + radar.Radius + 5)
+    
+    for i = 1, 4 do
+        local angle = (i-1) * math.pi / 2
+        radarGridLines[i].From = radar.Position
+        radarGridLines[i].To = Vector2.new(
+            radar.Position.X + math.cos(angle) * radar.Radius,
+            radar.Position.Y + math.sin(angle) * radar.Radius
+        )
+        radarGridLines[i].Visible = true
+    end
+    
+    radarDirection.From = radar.Position
+    radarDirection.To = Vector2.new(radar.Position.X, radar.Position.Y - radar.Radius)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player ~= LocalPlayer then
+            local rootPart = player.Character.HumanoidRootPart
+            local relativePosition = rootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position
+            
+            local radarX = radar.Position.X + (relativePosition.X / 10)
+            local radarY = radar.Position.Y + (relativePosition.Z / 10)
+            
+            local distanceFromCenter = math.sqrt((radarX - radar.Position.X)^2 + (radarY - radar.Position.Y)^2)
+            
+            if distanceFromCenter > radar.Radius then
+                local angle = math.atan2(radarY - radar.Position.Y, radarX - radar.Position.X)
+                radarX = radar.Position.X + math.cos(angle) * radar.Radius
+                radarY = radar.Position.Y + math.sin(angle) * radar.Radius
+            end
+            
+            if not radarPlayers[player] then
+                radarPlayers[player] = {
+                    dot = Drawing.new("Circle"),
+                    direction = Drawing.new("Line"),
+                    name = Drawing.new("Text")
+                }
+                
+                radarPlayers[player].dot.Thickness = 1
+                radarPlayers[player].dot.Filled = true
+                radarPlayers[player].dot.Radius = 4
+                
+                radarPlayers[player].direction.Thickness = 2
+                radarPlayers[player].direction.Visible = true
+                
+                radarPlayers[player].name.Size = 12
+                radarPlayers[player].name.Font = Drawing.Fonts.Monospace
+                radarPlayers[player].name.Outline = true
+                radarPlayers[player].name.OutlineColor = Color3.new(0, 0, 0)
+            end
+            
+            if player.Team == LocalPlayer.Team then
+                radarPlayers[player].dot.Color = Color3.new(0, 1, 0)  
+                radarPlayers[player].direction.Color = Color3.new(0, 0.8, 0)
+                radarPlayers[player].name.Color = Color3.new(0, 1, 0)
+            else
+                radarPlayers[player].dot.Color = Color3.new(1, 0, 0) 
+                radarPlayers[player].direction.Color = Color3.new(1, 0, 0)
+                radarPlayers[player].name.Color = Color3.new(1, 0, 0)
+            end
+            
+            radarPlayers[player].dot.Position = Vector2.new(radarX, radarY)
+            radarPlayers[player].dot.Visible = true
+            
+            local lookVector = rootPart.CFrame.LookVector
+            local directionLength = 10
+            radarPlayers[player].direction.From = Vector2.new(radarX, radarY)
+            radarPlayers[player].direction.To = Vector2.new(
+                radarX + lookVector.X * directionLength,
+                radarY + lookVector.Z * directionLength
+            )
+            
+            radarPlayers[player].name.Position = Vector2.new(radarX, radarY - 15)
+            radarPlayers[player].name.Text = player.Name
+            radarPlayers[player].name.Visible = distanceFromCenter <= radar.Radius
+        elseif radarPlayers[player] then
+            radarPlayers[player].dot.Visible = false
+            radarPlayers[player].direction.Visible = false
+            radarPlayers[player].name.Visible = false
         end
     end
-})
+    
+    for player, components in pairs(radarPlayers) do
+        if not Players:FindFirstChild(player.Name) then
+            components.dot.Visible = false
+            components.direction.Visible = false
+            components.name.Visible = false
+            radarPlayers[player] = nil
+        end
+    end
+end
 
--- 5. 射线透视开关（绘制从本地到目标的射线）
-local TracerESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "射线透视", 
-    Value = getgenv().ShowTracer, -- 初始状态同步全局变量
+RunService.RenderStepped:Connect(updateRadar)
+RunService.RenderStepped:Connect(updatePlayerCount)
+RunService.RenderStepped:Connect(updateFOV)
+
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        createESP(player)
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        createESP(player)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if ESPComponents[player] then
+        for _, component in pairs(ESPComponents[player]) do
+            if typeof(component) == "table" then
+                for _, drawing in pairs(component) do
+                    drawing:Remove()
+                end
+            else
+                component:Remove()
+            end
+        end
+        ESPComponents[player] = nil
+    end
+end)
+---------------------------------------------------------------------------------------------透视功能
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "透视开启", 
+    Value = false, 
     Callback = function(Value)
-        getgenv().ShowTracer = Value -- 更新全局控制变量
-        -- 发送功能状态通知
-        WindUI:Notify({
-            Title = "射线透视",
-            Content = Value and "射线透视已开启" or "射线透视已关闭",
-            Duration = 3,
-            Icon = "arrow-right-bold",
-        })
+        getgenv().ESPEnabled = Value
     end
 })
 
--- 6. 名字透视开关（显示玩家名称标签）
-local NameESPToggle = TabHandles.JBTY3:Toggle({
-    Title = "名字透视", 
-    Value = getgenv().ShowName, -- 初始状态同步全局变量
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "模型透视", 
+    Value = false, 
     Callback = function(Value)
-        getgenv().ShowName = Value -- 更新全局控制变量
-        -- 发送功能状态通知
-        WindUI:Notify({
-            Title = "名字透视",
-            Content = Value and "名字透视已开启" or "名字透视已关闭",
-            Duration = 3,
-            Icon = "text-box",
-        })
+        getgenv().ShowSkeleton = Value
+    end
+})
+
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "方框透视", 
+    Value = false, 
+    Callback = function(Value)
+        getgenv().ShowBox = Value
+    end
+})
+
+
+
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "射线透视", 
+    Value = false, 
+    Callback = function(Value)
+        getgenv().ShowTracer = Value
+    end
+})
+
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "名字透视", 
+    Value = false, 
+    Callback = function(Value)
+        getgenv().ShowName = Value
     end
 })
 
 ---------------------------------------------------------------------------------------------越HB脚本
 
+Button = TabHandles.JBTY4:Button({
+    Title = "环山军区",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%E7%8E%AF%E5%B1%B1%E5%86%9B%E5%8C%BA.lua"))()
+
+WindUI:Notify({
+    Title = "通知",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.gn:Button({
+    Title = "墨水游戏",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8AHB%20%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F.lua"))()
+        
+WindUI:Notify({
+    Title = "通知",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
 -----------------------------------------------------------------------------------------------自然灾害
 Button = TabHandles.ESPgn:Button({
     Title = "黑洞",
