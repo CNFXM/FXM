@@ -3282,71 +3282,97 @@ Toggle = TabHandles.JBTY3:Toggle({
 })
 
 -- 将库加载移到外部，避免重复加载
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
+if not _G.SkeletonLibrary then
+    _G.SkeletonLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
+end
 _G.Skeletons = _G.Skeletons or {}
+_G.SkeletonConnections = _G.SkeletonConnections or {}
 
-Toggle = TabHandles.JBTY3:Toggle({
+Toggle = TabHandles.YI:Toggle({
     Title = "透视骨骼",
-    Value = false, -- 初始状态：关闭
+    Value = false,
     Callback = function(state) 
-        if state then -- 开关开启：加载骨骼透视
-            -- 为已存在的玩家创建骨骼（排除本地玩家）
-            for _, Player in next, game.Players:GetChildren() do
+        if state then -- 开启骨骼透视
+            -- 清理之前的连接
+            if _G.SkeletonConnections.PlayerAdded then
+                _G.SkeletonConnections.PlayerAdded:Disconnect()
+            end
+            if _G.SkeletonConnections.PlayerRemoving then
+                _G.SkeletonRemoving:Disconnect()
+            end
+            
+            local function CreateSkeleton(Player)
                 if Player ~= game.Players.LocalPlayer then
-                    local newSkeleton = Library:NewSkeleton(Player, true)
-                    table.insert(_G.Skeletons, newSkeleton)
+                    -- 等待玩家角色加载
+                    local character = Player.Character
+                    if not character then
+                        -- 如果角色不存在，等待角色加载
+                        Player.CharacterAdded:Wait()
+                    end
+                    
+                    -- 创建骨骼
+                    local success, skeleton = pcall(function()
+                        return _G.SkeletonLibrary:NewSkeleton(Player, true)
+                    end)
+                    
+                    if success and skeleton then
+                        _G.Skeletons[Player] = skeleton
+                        print("已为玩家 " .. Player.Name .. " 创建骨骼")
+                    else
+                        warn("为玩家 " .. Player.Name .. " 创建骨骼失败")
+                    end
                 end
             end
             
-            -- 监听新加入玩家，自动创建骨骼
-            _G.PlayerAddedConnection = game.Players.PlayerAdded:Connect(function(Player)
-                if Player ~= game.Players.LocalPlayer then
-                    local newSkeleton = Library:NewSkeleton(Player, true)
-                    table.insert(_G.Skeletons, newSkeleton)
-                end
+            -- 为现有玩家创建骨骼
+            for _, Player in ipairs(game.Players:GetPlayers()) do
+                coroutine.wrap(CreateSkeleton)(Player)
+            end
+            
+            -- 监听新玩家加入
+            _G.SkeletonConnections.PlayerAdded = game.Players.PlayerAdded:Connect(function(Player)
+                wait(2) -- 等待玩家完全加入
+                coroutine.wrap(CreateSkeleton)(Player)
             end)
             
-            -- 监听玩家离开，清理对应骨骼
-            _G.PlayerRemovingConnection = game.Players.PlayerRemoving:Connect(function(Player)
-                for i, skeleton in ipairs(_G.Skeletons) do
-                    if skeleton and skeleton.Player == Player then
-                        if skeleton.Destroy then
-                            skeleton:Destroy()
-                        end
-                        table.remove(_G.Skeletons, i)
-                        break
+            -- 监听玩家离开
+            _G.SkeletonConnections.PlayerRemoving = game.Players.PlayerRemoving:Connect(function(Player)
+                if _G.Skeletons[Player] then
+                    if _G.Skeletons[Player].Destroy then
+                        _G.Skeletons[Player]:Destroy()
                     end
+                    _G.Skeletons[Player] = nil
                 end
             end)
             
-            -- 开启通知
+            -- 通知
             WindUI:Notify({
                 Title = "通知",
                 Content = "透视骨骼已开启",
                 Duration = 3,
                 Icon = "layout-grid",
             })
-        else -- 开关关闭：销毁骨骼+清理资源
-            -- 断开事件连接
-            if _G.PlayerAddedConnection then
-                _G.PlayerAddedConnection:Disconnect()
-                _G.PlayerAddedConnection = nil
+            
+        else -- 关闭骨骼透视
+            -- 断开连接
+            if _G.SkeletonConnections.PlayerAdded then
+                _G.SkeletonConnections.PlayerAdded:Disconnect()
+                _G.SkeletonConnections.PlayerAdded = nil
             end
-            if _G.PlayerRemovingConnection then
-                _G.PlayerRemovingConnection:Disconnect()
-                _G.PlayerRemovingConnection = nil
+            if _G.SkeletonConnections.PlayerRemoving then
+                _G.SkeletonConnections.PlayerRemoving:Disconnect()
+                _G.SkeletonConnections.PlayerRemoving = nil
             end
             
-            -- 遍历销毁所有骨骼实例
-            for i, skeleton in ipairs(_G.Skeletons) do
+            -- 销毁所有骨骼
+            for Player, skeleton in pairs(_G.Skeletons) do
                 if skeleton and skeleton.Destroy then
                     skeleton:Destroy()
                 end
             end
-            -- 清空存储表
-            table.clear(_G.Skeletons)
+            _G.Skeletons = {}
             
-            -- 关闭通知
+            -- 通知
             WindUI:Notify({
                 Title = "通知",
                 Content = "透视骨骼已关闭",
@@ -3355,7 +3381,7 @@ Toggle = TabHandles.JBTY3:Toggle({
             })
         end
     end
-})  -- 这里改为英文逗号或直接结束
+})
 
 Toggle = TabHandles.JBTY3:Toggle({
     Title = "射线透视", 
