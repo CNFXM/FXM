@@ -169,9 +169,9 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
 
 local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "复制主群",
-    Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
+    Desc = "QQ主群:945593455", -- 明确提示要复制的内容
     Buttons = {{
-        Title = "QQ主群:945593455",
+        Title = "复制",
         Icon = "copy", -- 恢复“复制”图标，更贴合功能
         Variant = "Primary",
         Callback = function()
@@ -183,8 +183,8 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
             Sound.SoundId = "rbxassetid://2865227271"
             Sound:Play()
             WindUI:Notify({
-                Title = "HB脚本中心---提示：",
-                Content = "已成功复制FXM！", -- 通知内容也同步修改
+                Title = "FXM脚本：",
+                Content = "已成功复制！", -- 通知内容也同步修改
                 Icon = "bell",
                 IconThemed = true,
                 Duration = 5
@@ -195,9 +195,9 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
 
 local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "复制2群",
-    Desc = "点击按钮可复制：FXM", -- 明确提示要复制的内容
+    Desc = "QQ2群:301342746", -- 明确提示要复制的内容
     Buttons = {{
-        Title = "QQ2群:301342746",
+        Title = "复制",
         Icon = "copy", -- 恢复“复制”图标，更贴合功能
         Variant = "Primary",
         Callback = function()
@@ -209,8 +209,8 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
             Sound.SoundId = "rbxassetid://2865227271"
             Sound:Play()
             WindUI:Notify({
-                Title = "HB脚本中心---提示：",
-                Content = "已成功复制FXM！", -- 通知内容也同步修改
+                Title = "FXM脚本：",
+                Content = "已成功复制！", -- 通知内容也同步修改
                 Icon = "bell",
                 IconThemed = true,
                 Duration = 5
@@ -218,6 +218,44 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
         end
     }}
 })
+-----------------更新区域------------------
+local Paragraph = TabHandles.GGXX2:Paragraph({
+    Title = "FXM脚本重置版0.5:",
+    Desc = "UI界面",
+    Image = "rbxassetid://81944629903864",
+    ImageSize = 42,
+    Thumbnail = "rbxassetid://128537295758977",
+    ThumbnailSize = 120,
+})
+-----------------信息区域------------------
+-- 1. 创建带时间显示的Paragraph显示框
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "FXM脚本重置版0.5:",
+    Desc = "UI界面（加载中...）", -- 初始占位文本
+    Image = "rbxassetid://81944629903864",
+    ImageSize = 42,
+    Thumbnail = "rbxassetid://128537295758977",
+    ThumbnailSize = 120,
+})
+
+-- 2. 整合实时更新北京时间的逻辑
+local RunService = game:GetService("RunService")
+
+-- 实时更新时间的函数（直接修改Paragraph的Desc文本）
+local function updateTime()
+    local hour = os.date("%H") -- 24小时制小时
+    local minute = os.date("%M") -- 分钟
+    local second = os.date("%S") -- 秒
+    -- 将时间拼接到底部描述中，保留原"UI界面"文本
+    Paragraph.Desc = "UI界面\n北京时间:" .. hour .. "时" .. minute .. "分" .. second .. "秒"
+end
+
+-- 初始执行一次，避免加载时显示占位文本
+updateTime()
+
+-- 每帧触发时间更新（确保时间实时同步）
+RunService.RenderStepped:Connect(updateTime)
+
 
 -----------------UI设置------------------
 local Button = TabHandles.UI:Button({
