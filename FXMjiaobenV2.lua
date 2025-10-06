@@ -229,31 +229,30 @@ local Paragraph = TabHandles.GGXX2:Paragraph({
 })
 -----------------信息区域------------------
 -- 1. 创建带时间显示的Paragraph显示框
-local Paragraph = TabHandles.GGXX3:Paragraph({
+local Paragraph = TabHandles.GGXX2:Paragraph({
     Title = "FXM脚本重置版0.5:",
-    Desc = "UI界面（加载中...）", -- 初始占位文本
+    Desc = "时间", -- 初始直接显示“时间”
     Image = "rbxassetid://81944629903864",
     ImageSize = 42,
     Thumbnail = "rbxassetid://128537295758977",
     ThumbnailSize = 120,
 })
 
--- 2. 整合实时更新北京时间的逻辑
+-- 2. 实时更新时间逻辑
 local RunService = game:GetService("RunService")
 
--- 实时更新时间的函数（直接修改Paragraph的Desc文本）
 local function updateTime()
-    local hour = os.date("%H") -- 24小时制小时
-    local minute = os.date("%M") -- 分钟
-    local second = os.date("%S") -- 秒
-    -- 将时间拼接到底部描述中，保留原"UI界面"文本
-    Paragraph.Desc = "UI界面\n北京时间:" .. hour .. "时" .. minute .. "分" .. second .. "秒"
+    local hour = os.date("%H")
+    local minute = os.date("%M")
+    local second = os.date("%S")
+    -- 固定“时间”为前缀，换行显示具体北京时间
+    Paragraph.Desc = "时间\n北京时间: " .. hour .. "时" .. minute .. "分" .. second .. "秒"
 end
 
--- 初始执行一次，避免加载时显示占位文本
+-- 初始执行，避免空白
 updateTime()
 
--- 每帧触发时间更新（确保时间实时同步）
+-- 每帧同步更新
 RunService.RenderStepped:Connect(updateTime)
 
 
