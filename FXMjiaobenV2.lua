@@ -103,7 +103,7 @@ local Tabs = {
     UI = Window:Section({ Title = "UI设置", Opened = true }),
     JBGJHZ = Window:Section({ Title = "混杂工具", Opened = true }),
     GDJB = Window:Section({ Title = "更多脚本", Opened = true }),
-    Main = Window:Section({ Title = "通用功能", Opened = true }),
+    JBTY = Window:Section({ Title = "混杂通用", Opened = true }),
     gn = Window:Section({ Title = "缝合脚本", Opened = true }),    
 }
 
@@ -115,9 +115,10 @@ local TabHandles = {
     JBGJHZ = Tabs.JBGJHZ:Tab({ Title = "工具区域", Icon = "layout-grid" }),
     GDJB1 = Tabs.GDJB:Tab({ Title = "汉化区域", Icon = "layout-grid" }),
     GDJB2 = Tabs.GDJB:Tab({ Title = "更多区域", Icon = "layout-grid" }),
-    YI = Tabs.Main:Tab({ Title = "调节区域", Icon = "layout-grid" }),
-    ER = Tabs.Main:Tab({ Title = "透视功能", Icon = "layout-grid" }),    
-    gn = Tabs.Main:Tab({ Title = "越 HB脚本", Icon = "layout-grid" }),
+    JBTY1 = Tabs.JBTY:Tab({ Title = "调节区域", Icon = "layout-grid" }),
+    JBTY2 = Tabs.JBTY:Tab({ Title = "点击区域", Icon = "layout-grid" }),
+    JBTY3 = Tabs.JBTY:Tab({ Title = "绘制区域", Icon = "layout-grid" }),    
+    JBTY4 = Tabs.JBTY:Tab({ Title = "越 HB脚本", Icon = "layout-grid" }),
     ESPgn = Tabs.gn:Tab({ Title = "自然灾害", Icon = "layout-grid" }),
     pbgn = Tabs.gn:Tab({ Title = "被遗弃", Icon = "layout-grid" }),
     tzgn = Tabs.gn:Tab({ Title = "最坚强战场", Icon = "layout-grid" }),
@@ -818,6 +819,40 @@ WindUI:Notify({
         
     end
 })
+
+Button = TabHandles.GDJB1:Button({
+    Title = "汉化飞行V3",
+    Desc = "人物飞行",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMFLYV3.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.GDJB1:Button({
+    Title = "汉化传送",
+    Desc = "人物传送",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMdeliver.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
 -----------------更多区域------------------
 local Paragraph = TabHandles.GDJB2:Paragraph({
     Title = "更多区域",
@@ -847,7 +882,7 @@ WindUI:Notify({
 
 Button = TabHandles.GDJB2:Button({
     Title = "小月脚本",
-    Desc = "不必多言合师傅",
+    Desc = "不必多言师傅",
     Locked = false,
     Callback = function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MIAN57/-/refs/heads/main/%E5%B0%8F%E6%9C%88%E8%84%9A%E6%9C%AC%E6%BA%90%E7%A0%81"))()
@@ -932,12 +967,12 @@ WindUI:Notify({
     end
 })
 
------------------通用功能------------------
-Slider = TabHandles.YI:Slider({
-    Title = "跳跃",
+-----------------调节区域------------------
+Slider = TabHandles.JBTY1:Slider({
+    Title = "跳跃设置",
     Value = {
-        Min = 50,
-        Max = 200,
+        Min = 0,
+        Max = 1000,
         Default = 50,
     },
     Increment = 1,
@@ -947,12 +982,12 @@ Slider = TabHandles.YI:Slider({
         end
     end
 })
------------------------------------------------------------------------------------------------速度
-Slider = TabHandles.YI:Slider({
-    Title = "速度",
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "速度设置",
     Value = {
-        Min = 16,
-        Max = 400,
+        Min = 0,
+        Max = 1000,
         Default = 16,
     },
     Increment = 1,
@@ -962,12 +997,12 @@ Slider = TabHandles.YI:Slider({
         end
     end
 })
------------------------------------------------------------------------------------------------重量        
-Slider = TabHandles.YI:Slider({
-    Title = "重量",
+ 
+Slider = TabHandles.JBTY1:Slider({
+    Title = "重力设置",
     Value = {
-        Min = 0.1,
-        Max = 500.0,
+        Min = 0.0,
+        Max = 1000.0,
         Default = 196.2,
     },
     Step = 0.1,
@@ -975,497 +1010,580 @@ Slider = TabHandles.YI:Slider({
         game.Workspace.Gravity = value
     end
 })
-TabHandles.YI:Divider()
------------------------------------------------------------------------------------------------飞行
-Button =TabHandles.YI:Button({
-    Title = "飞行v1",
-    Desc = "",
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "镜头焦距",
+    Value = {
+        Min = 0.0,
+        Max = 1000.0,
+        Default = 70,
+    },
+    Step = 1,
+    Callback = function(value)
+        game.Workspace.CurrentCamera.FieldOfView = value
+    end
+})
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "视角上限",
+    Value = {
+        Min = 0.0,
+        Max = 1000.0,
+        Default = 100,
+    },
+    Step = 1,
+    Callback = function(value)
+        game:GetService("Players").LocalPlayer.CameraMaxZoomDistance = value
+    end
+})
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "当前血量",
+    Value = {
+        Min = 0,
+        Max = 1000,
+        Default = 100,
+    },
+    Step = 1,
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.Health = value
+    end
+})
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "最大血量",
+    Value = {
+        Min = 0,
+        Max = 1000,
+        Default = 100,
+    },
+    Step = 1,
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.MaxHealth = value
+    end
+})
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "旋转速度",
+    Value = {
+        Min = 0,
+        Max = 1000,
+        Default = 0,
+    },
+    Step = 0.1,
+    Callback = function(Value)
+-- 在源码中直接修改此数值即可调整旋转速度，0及以下不旋转，大于0则旋转
+local speed = Value -- 核心速度控制变量，示例：设为1会旋转，设为0则不旋转
+
+local plr = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- 等待角色加载完成
+repeat task.wait() until plr.Character
+local character = plr.Character
+local hum = character:WaitForChild("Humanoid")
+local humRoot = character:WaitForChild("HumanoidRootPart")
+local velocity = nil -- 旋转组件变量
+
+-- 初始化旋转逻辑：仅当speed大于1时才创建旋转组件
+if speed > 0 then
+    hum.AutoRotate = false -- 关闭自动转向
+    -- 创建旋转组件并应用速度
+    velocity = Instance.new("AngularVelocity")
+    velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+    velocity.MaxTorque = math.huge
+    velocity.AngularVelocity = Vector3.new(0, speed, 0) -- 应用设置的速度
+    velocity.Parent = humRoot
+    velocity.Name = "Spinbot"
+    print("旋转已启动，当前速度：" .. speed)
+else
+    -- speed为1及以下时，保持角色默认状态
+    hum.AutoRotate = true
+    print("速度设置为0或以下，不启动旋转，角色保持默认状态")
+end
+    end
+})
+
+Slider = TabHandles.JBTY1:Slider({
+    Title = "触碰范围",
+    Value = {
+        Min = 2,
+        Max = 1000,
+        Default = 2,
+    },
+    Step = 1,
+    Callback = function(Value)
+    _G.HeadSize = Value
+    end
+})
+
+Button = TabHandles.JBTY1:Button({
+    Title = "确认开启",
+    Desc = "开启触碰范围第2步",
     Locked = false,
     Callback = function()
-        local main = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local up = Instance.new("TextButton")
-local down = Instance.new("TextButton")
-local onof = Instance.new("TextButton")
-local TextLabel = Instance.new("TextLabel")
-local plus = Instance.new("TextButton")
-local speed = Instance.new("TextLabel")
-local mine = Instance.new("TextButton")
-local closebutton = Instance.new("TextButton")
-local mini = Instance.new("TextButton")
-local mini2 = Instance.new("TextButton")
-
-main.Name = "main"
-main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-main.ResetOnSpawn = false
-
-Frame.Parent = main
-Frame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-Frame.BorderColor3 = Color3.fromRGB(103, 221, 213)
-Frame.Position = UDim2.new(0.100320168, 0, 0.379746825, 0)
-Frame.Size = UDim2.new(0, 190, 0, 57)
-
-up.Name = "上"
-up.Parent = Frame
-up.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-up.Size = UDim2.new(0, 44, 0, 28)
-up.Font = Enum.Font.SourceSans
-up.Text = "上"
-up.TextColor3 = Color3.fromRGB(0, 0, 0)
-up.TextSize = 14.000
-
-down.Name = "下"
-down.Parent = Frame
-down.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-down.Position = UDim2.new(0, 0, 0.491228074, 0)
-down.Size = UDim2.new(0, 44, 0, 28)
-down.Font = Enum.Font.SourceSans
-down.Text = "下"
-down.TextColor3 = Color3.fromRGB(0, 0, 0)
-down.TextSize = 14.000
-
-onof.Name = "onof"
-onof.Parent = Frame
-onof.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
-onof.Position = UDim2.new(0.702823281, 0, 0.491228074, 0)
-onof.Size = UDim2.new(0, 56, 0, 28)
-onof.Font = Enum.Font.SourceSans
-onof.Text = "fly"
-onof.TextColor3 = Color3.fromRGB(0, 0, 0)
-onof.TextSize = 14.000
-
-TextLabel.Parent = Frame
-TextLabel.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
-TextLabel.Position = UDim2.new(0.469327301, 0, 0, 0)
-TextLabel.Size = UDim2.new(0, 100, 0, 28)
-TextLabel.Font = Enum.Font.SourceSans
-TextLabel.Text = "越 HB脚本"
-TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.TextScaled = true
-TextLabel.TextSize = 14.000
-TextLabel.TextWrapped = true
-
-plus.Name = "plus"
-plus.Parent = Frame
-plus.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
-plus.Position = UDim2.new(0.231578946, 0, 0, 0)
-plus.Size = UDim2.new(0, 45, 0, 28)
-plus.Font = Enum.Font.SourceSans
-plus.Text = "+"
-plus.TextColor3 = Color3.fromRGB(0, 0, 0)
-plus.TextScaled = true
-plus.TextSize = 14.000
-plus.TextWrapped = true
-
-speed.Name = "speed"
-speed.Parent = Frame
-speed.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-speed.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
-speed.Size = UDim2.new(0, 44, 0, 28)
-speed.Font = Enum.Font.SourceSans
-speed.Text = "1"
-speed.TextColor3 = Color3.fromRGB(0, 0, 0)
-speed.TextScaled = true
-speed.TextSize = 14.000
-speed.TextWrapped = true
-
-mine.Name = "mine"
-mine.Parent = Frame
-mine.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
-mine.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
-mine.Size = UDim2.new(0, 45, 0, 29)
-mine.Font = Enum.Font.SourceSans
-mine.Text = "-"
-mine.TextColor3 = Color3.fromRGB(0, 0, 0)
-mine.TextScaled = true
-mine.TextSize = 14.000
-mine.TextWrapped = true
-
-closebutton.Name = "Close"
-closebutton.Parent = main.Frame
-closebutton.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
-closebutton.Font = "SourceSans"
-closebutton.Size = UDim2.new(0, 45, 0, 28)
-closebutton.Text = "关闭"
-closebutton.TextSize = 30
-closebutton.Position =  UDim2.new(0, 0, -1, 27)
-
-mini.Name = "minimize"
-mini.Parent = main.Frame
-mini.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-mini.Font = "SourceSans"
-mini.Size = UDim2.new(0, 45, 0, 28)
-mini.Text = "T"
-mini.TextSize = 30
-mini.Position = UDim2.new(0, 44, -1, 27)
-
-mini2.Name = "minimize2"
-mini2.Parent = main.Frame
-mini2.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
-mini2.Font = "SourceSans"
-mini2.Size = UDim2.new(0, 45, 0, 28)
-mini2.Text = "T"
-mini2.TextSize = 30
-mini2.Position = UDim2.new(0, 44, -1, 57)
-mini2.Visible = false
-
-speeds = 1
-
-local speaker = game:GetService("Players").LocalPlayer
-
-local chr = game.Players.LocalPlayer.Character
-local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-
-nowe = false
-
-game:GetService("StarterGui"):SetCore("SendNotification", { 
-	Title = "越 HB飞行";
-	Text = "lnjection succeeded";
-	Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
-Duration = 5;
-
-Frame.Active = true -- main = gui
-Frame.Draggable = true
-
-onof.MouseButton1Down:connect(function()
-
-	if nowe == true then
-		nowe = false
-
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
-		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
-	else 
-		nowe = true
-
-
-
-		for i = 1, speeds do
-			spawn(function()
-
-				local hb = game:GetService("RunService").Heartbeat	
-
-
-				tpwalking = true
-				local chr = game.Players.LocalPlayer.Character
-				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
-					if hum.MoveDirection.Magnitude > 0 then
-						chr:TranslateBy(hum.MoveDirection)
-					end
-				end
-
-			end)
-		end
-		game.Players.LocalPlayer.Character.Animate.Disabled = true
-		local Char = game.Players.LocalPlayer.Character
-		local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
-
-		for i,v in next, Hum:GetPlayingAnimationTracks() do
-			v:AdjustSpeed(0)
-		end
-		
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
-		speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
-		speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-	end
-
-
-	if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-
-
-
-		local plr = game.Players.LocalPlayer
-		local torso = plr.Character.Torso
-		local flying = true
-		local deb = true
-		local ctrl = {f = 0, b = 0, l = 0, r = 0}
-		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		local maxspeed = 50
-		local speed = 0
-
-
-		local bg = Instance.new("BodyGyro", torso)
-		bg.P = 9e4
-		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-		bg.cframe = torso.CFrame
-		local bv = Instance.new("BodyVelocity", torso)
-		bv.velocity = Vector3.new(0,0.1,0)
-		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-		if nowe == true then
-			plr.Character.Humanoid.PlatformStand = true
-		end
-		while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
-			game:GetService("RunService").RenderStepped:Wait()
-
-			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-				speed = speed+.5+(speed/maxspeed)
-				if speed > maxspeed then
-					speed = maxspeed
-				end
-			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
-				speed = speed-1
-				if speed < 0 then
-					speed = 0
-				end
-			end
-			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
-				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
-			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
-				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-			else
-				bv.velocity = Vector3.new(0,0,0)
-			end
-			--	game.Players.LocalPlayer.Character.Animate.Disabled = true
-			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
-		end
-		ctrl = {f = 0, b = 0, l = 0, r = 0}
-		lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		speed = 0
-		bg:Destroy()
-		bv:Destroy()
-		plr.Character.Humanoid.PlatformStand = false
-		game.Players.LocalPlayer.Character.Animate.Disabled = false
-		tpwalking = false
-
-
-
-
-	else
-		local plr = game.Players.LocalPlayer
-		local UpperTorso = plr.Character.UpperTorso
-		local flying = true
-		local deb = true
-		local ctrl = {f = 0, b = 0, l = 0, r = 0}
-		local lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		local maxspeed = 50
-		local speed = 0
-
-
-		local bg = Instance.new("BodyGyro", UpperTorso)
-		bg.P = 9e4
-		bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-		bg.cframe = UpperTorso.CFrame
-		local bv = Instance.new("BodyVelocity", UpperTorso)
-		bv.velocity = Vector3.new(0,0.1,0)
-		bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-		if nowe == true then
-			plr.Character.Humanoid.PlatformStand = true
-		end
-		while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
-			wait()
-
-			if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-				speed = speed+.5+(speed/maxspeed)
-				if speed > maxspeed then
-					speed = maxspeed
-				end
-			elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
-				speed = speed-1
-				if speed < 0 then
-					speed = 0
-				end
-			end
-			if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
-				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-				lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
-			elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
-				bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-			else
-				bv.velocity = Vector3.new(0,0,0)
-			end
-
-			bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
-		end
-		ctrl = {f = 0, b = 0, l = 0, r = 0}
-		lastctrl = {f = 0, b = 0, l = 0, r = 0}
-		speed = 0
-		bg:Destroy()
-		bv:Destroy()
-		plr.Character.Humanoid.PlatformStand = false
-		game.Players.LocalPlayer.Character.Animate.Disabled = false
-		tpwalking = false
-
-
-
-	end
-
-
-
-
-
-end)
-
-local tis
-
-up.MouseButton1Down:connect(function()
-	tis = up.MouseEnter:connect(function()
-		while tis do
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,1,0)
-		end
-	end)
-end)
-
-up.MouseLeave:connect(function()
-	if tis then
-		tis:Disconnect()
-		tis = nil
-	end
-end)
-
-local dis
-
-down.MouseButton1Down:connect(function()
-	dis = down.MouseEnter:connect(function()
-		while dis do
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1,0)
-		end
-	end)
-end)
-
-down.MouseLeave:connect(function()
-	if dis then
-		dis:Disconnect()
-		dis = nil
-	end
-end)
-
-
-game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(char)
-	wait(0.7)
-	game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
-	game.Players.LocalPlayer.Character.Animate.Disabled = false
-
-end)
-
-
-plus.MouseButton1Down:connect(function()
-	speeds = speeds + 1
-	speed.Text = speeds
-	if nowe == true then
-
-
-		tpwalking = false
-		for i = 1, speeds do
-			spawn(function()
-
-				local hb = game:GetService("RunService").Heartbeat	
-
-
-				tpwalking = true
-				local chr = game.Players.LocalPlayer.Character
-				local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-				while tpwalking and hb:Wait() and chr and hum and hum.Parent do
-					if hum.MoveDirection.Magnitude > 0 then
-						chr:TranslateBy(hum.MoveDirection)
-					end
-				end
-
-			end)
-		end
-	end
-end)
-mine.MouseButton1Down:connect(function()
-	if speeds == 1 then
-		speed.Text = 'flyno1'
-		wait(1)
-		speed.Text = speeds
-	else
-		speeds = speeds - 1
-		speed.Text = speeds
-		if nowe == true then
-			tpwalking = false
-			for i = 1, speeds do
-				spawn(function()
-
-					local hb = game:GetService("RunService").Heartbeat	
-
-
-					tpwalking = true
-					local chr = game.Players.LocalPlayer.Character
-					local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-					while tpwalking and hb:Wait() and chr and hum and hum.Parent do
-						if hum.MoveDirection.Magnitude > 0 then
-							chr:TranslateBy(hum.MoveDirection)
-						end
-					end
-
-				end)
-			end
-		end
-	end
-end)
-
-closebutton.MouseButton1Click:Connect(function()
-	main:Destroy()
-end)
-
-mini.MouseButton1Click:Connect(function()
-	up.Visible = false
-	down.Visible = false
-	onof.Visible = false
-	plus.Visible = false
-	speed.Visible = false
-	mine.Visible = false
-	mini.Visible = false
-	mini2.Visible = true
-	main.Frame.BackgroundTransparency = 1
-	closebutton.Position =  UDim2.new(0, 0, -1, 57)
-end)
-
-mini2.MouseButton1Click:Connect(function()
-	up.Visible = true
-	down.Visible = true
-	onof.Visible = true
-	plus.Visible = true
-	speed.Visible = true
-	mine.Visible = true
-	mini.Visible = true
-	mini2.Visible = false
-	main.Frame.BackgroundTransparency = 0 
-	closebutton.Position =  UDim2.new(0, 0, -1, 27)
-end)
-            
+        _G.Disabled = true
+    game:GetService('RunService').RenderStepped:connect(function()
+        if _G.Disabled then
+            for i,v in next, game:GetService('Players'):GetPlayers() do
+                if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+                    pcall(function()
+                        -- 移除“<=1”的判断，直接使用滑块输入值作为尺寸
+                        local finalSize = _G.HeadSize
+                        -- 透明度固定为0.7（所有值均不隐藏，保持显示）
+                        v.Character.HumanoidRootPart.Size = Vector3.new(finalSize, finalSize, finalSize)
+                        v.Character.HumanoidRootPart.Transparency = 0.7 -- 核心修改：固定显示，不隐藏
+                        v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really red")
+                        v.Character.HumanoidRootPart.Material = "Neon"
+                        v.Character.HumanoidRootPart.CanCollide = false
+                    end)
+                end
+            end
+        end
+    end)
+        
 WindUI:Notify({
-    Title = "通知",
+    Title = "FXM",
+    Content = "设置成功!",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+TabHandles.JBTY1:Divider()
+-----------------点击区域------------------
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "穿墙", 
+    Value = false, 
+    Callback = function(Value)
+        local Workspace = game:GetService("Workspace")
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+
+        local Plr = Players.LocalPlayer
+        local SteppedConnection = nil -- 存储循环连接，用于关闭时断开
+
+        -- 先断开已有连接（避免重复创建循环）
+        if SteppedConnection then
+            SteppedConnection:Disconnect()
+        end
+
+        if Value then -- 开启穿墙
+            if not Plr.Character then
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "角色未加载，无法开启穿墙",
+                    Duration = 3,
+                    Icon = "layout-grid",
+                })
+                return
+            end
+
+            -- 循环设置角色部件碰撞为false
+            SteppedConnection = RunService.Stepped:Connect(function()
+                if not Plr.Character or not Value then
+                    SteppedConnection:Disconnect()
+                    return
+                end
+                for _, v in pairs(Plr.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end)
+        else -- 关闭穿墙
+            -- 断开循环
+            if SteppedConnection then
+                SteppedConnection:Disconnect()
+            end
+            -- 恢复角色碰撞（可选，按需保留）
+            if Plr.Character then
+                for _, v in pairs(Plr.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+            end
+        end
+
+        -- 状态切换通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "开启成功" or "关闭成功",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "无限跳", 
+    Value = false, 
+    Callback = function(Value)
+        local Players = game:GetService("Players")
+        local UserInputService = game:GetService("UserInputService")
+        
+        local Plr = Players.LocalPlayer
+        local Jump = Value -- 无限跳状态
+        local JumpConn = nil -- 存储输入连接，用于切换时断开
+        
+        -- 每次切换状态前，先断开之前的JumpRequest连接（关键修复）
+        if JumpConn then
+            JumpConn:Disconnect()
+        end
+
+        -- 若角色未加载，不执行后续逻辑（避免报错）
+        if not Plr.Character then
+            warn("角色未加载，无法启用无限跳")
+            return
+        end
+        local Humanoid = Plr.Character:FindFirstChildOfClass("Humanoid")
+        if not Humanoid then return end
+
+        -- 状态为true（开启）时，绑定跳跃请求
+        if Jump then
+            JumpConn = UserInputService.JumpRequest:Connect(function()
+                -- 防止角色消失/人形失效导致的报错
+                if Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") then
+                    Plr.Character.Humanoid:ChangeState("Jumping")
+                end
+            end)
+        end
+
+        -- （可选）状态切换通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "无限跳已开启" or "无限跳已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "夜视", 
+    Value = false, 
+    Callback = function(Value)
+        -- 原环境光控制逻辑（未做任何修改）
+        if Value then
+            game.Lighting.Ambient = Color3.new(1, 1, 1)
+        else
+            game.Lighting.Ambient = Color3.new(0, 0, 0)
+        end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "已开启" or "已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "人物燃尽[假延迟]", 
+    Value = false, 
+    Callback = function(Value)
+        -- 假延迟核心变量（放在Toggle回调内，确保开关状态绑定）
+        local fakeLagEnabled = Value
+        local fakeLagThread
+
+        -- 假延迟执行函数（通过锚定HumanoidRootPart制造卡顿）
+        local function toggleFakeLag()
+            local lp = game:GetService("Players").LocalPlayer
+            -- 仅在开关开启（Value=true）时循环执行
+            while fakeLagEnabled do
+                task.wait()
+                local character = lp.Character
+                if character then
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Anchored = true -- 锚定（卡住）
+                        task.wait(0.2) -- 卡顿持续时间
+                        hrp.Anchored = false -- 取消锚定（恢复）
+                        task.wait()
+                    end
+                end
+            end
+        end
+
+        -- 开关开启：启动假延迟协程
+        if fakeLagEnabled then
+            fakeLagThread = coroutine.create(toggleFakeLag)
+            coroutine.resume(fakeLagThread)
+        else
+            -- 开关关闭：停止循环（通过修改变量让while循环退出）
+            fakeLagEnabled = false
+        end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "假延迟已开启" or "假延迟已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "布娃娃模式", 
+    Value = false, 
+    Callback = function(Value)
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+
+        local isRagdolled = Value
+        local motorBackup = {}
+
+        local function getCharacter()
+            return player.Character or player.CharacterAdded:Wait()
+        end
+
+        local function toggleRagdoll()
+            local character = getCharacter()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if not humanoid or humanoid.Health <= 0 then return end
+
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+
+            if isRagdolled then
+                -- 开启布娃娃：保留原逻辑
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                humanoid.AutoRotate = false
+                motorBackup = {}
+
+                for _, joint in ipairs(character:GetDescendants()) do
+                    if joint:IsA("Motor6D") then
+                        local socket = Instance.new("BallSocketConstraint")
+                        local a1 = Instance.new("Attachment")
+                        local a2 = Instance.new("Attachment")
+
+                        a1.CFrame = joint.C0
+                        a2.CFrame = joint.C1
+                        a1.Parent = joint.Part0
+                        a2.Parent = joint.Part1
+
+                        socket.Attachment0 = a1
+                        socket.Attachment1 = a2
+                        socket.Parent = joint.Parent
+                        socket.LimitsEnabled = true
+                        socket.TwistLimitsEnabled = true
+
+                        motorBackup[joint.Name .. "_" .. joint:GetFullName()] = {
+                            Part0 = joint.Part0,
+                            Part1 = joint.Part1,
+                            C0 = joint.C0,
+                            C1 = joint.C1,
+                            Parent = joint.Parent,
+                        }
+
+                        joint:Destroy()
+                    end
+                end
+
+                root.Velocity = Vector3.new(0, 15, 0)
+
+            else
+                -- 关闭布娃娃：仅恢复关节+清理约束，删除“重置人物（GettingUp）”相关代码
+                for _, data in pairs(motorBackup) do
+                    local motor = Instance.new("Motor6D")
+                    motor.Name = "RestoredMotor"
+                    motor.Part0 = data.Part0
+                    motor.Part1 = data.Part1
+                    motor.C0 = data.C0
+                    motor.C1 = data.C1
+                    motor.Parent = data.Parent
+                end
+                motorBackup = {}
+
+                -- 【核心修改】删除这行：不再让人物自动起身（去掉GettingUp状态切换）
+                -- humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                humanoid.AutoRotate = true -- 仅保留自动旋转恢复
+
+                -- 清理残留约束和附件（保留原逻辑）
+                for _, item in ipairs(character:GetDescendants()) do
+                    if item:IsA("BallSocketConstraint") or item:IsA("Attachment") then
+                        item:Destroy()
+                    end
+                end
+            end
+        end
+
+        player.CharacterAdded:Connect(function(char)
+            isRagdolled = false
+            motorBackup = {}
+        end)
+
+        toggleRagdoll()
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "布娃娃模式已开启" or "布娃娃模式已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "自动交互", 
+    Value = false, 
+    Callback = function(state)
+        local autoInteract = false
+        local interactThread -- 存储循环线程，避免重复创建
+
+        -- 停止旧线程（防止开关切换后残留循环）
+        if interactThread then
+            autoInteract = false
+            task.wait() -- 等待旧循环退出
+        end
+
+        if state then
+            autoInteract = true
+            -- 启动自动交互循环
+            interactThread = task.spawn(function()
+                while autoInteract do
+                    -- 遍历工作区所有子对象，触发所有ProximityPrompt
+                    for _, descendant in pairs(workspace:GetDescendants()) do
+                        if descendant:IsA("ProximityPrompt") then
+                            fireproximityprompt(descendant)
+                        end
+                    end
+                    task.wait(0.25) -- 交互间隔（可按需调整）
+                end
+            end)
+        else
+            autoInteract = false
+        end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = state and "自动交互已开启" or "自动交互已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Toggle = TabHandles.JBTY2:Toggle({
+    Title = "防AFK挂机", 
+    Value = false, 
+    Callback = function(Value)
+        local Players = game:GetService("Players")
+        local localPlayer = Players.LocalPlayer
+        local Afk1 = Value -- AFK状态开关（与Toggle值绑定）
+        local afkThread -- 存储AFK循环线程，用于切换时清理
+
+        -- AFK自动移动核心函数
+        local function Afk2()
+            while Afk1 do
+                task.wait(0.2)
+                -- 确保角色和HumanoidRootPart存在（避免报错）
+                if not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    task.wait(1) -- 角色未加载时等待1秒再重试
+                    continue
+                end
+                local epoh3 = localPlayer.Character.HumanoidRootPart
+
+                -- 移动到坐标1
+                local epoh1 = CFrame.new(-442040, 4, 4)--1
+                epoh3.CFrame = epoh1
+                task.wait(0.2)
+
+                -- 移动到坐标2
+                epoh1 = CFrame.new(-442060, 4, 4)--2
+                epoh3.CFrame = epoh1
+                task.wait(0.2)
+
+                -- 移动到坐标3
+                epoh1 = CFrame.new(-442080, 4, 4)--3
+                epoh3.CFrame = epoh1
+            end
+        end
+
+        -- 切换逻辑：开启时启动线程，关闭时停止循环
+        if Afk1 then
+            -- 启动AFK线程（用task.spawn避免阻塞回调）
+            afkThread = task.spawn(Afk2)
+        else
+            -- 关闭AFK：通过修改变量让循环退出
+            Afk1 = false
+            -- 若线程存在，等待循环结束（可选，增强稳定性）
+            if afkThread then
+                task.wait(0.5)
+            end
+        end
+
+        -- 新增：状态切换提示通知
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "防AFK挂机已开启" or "防AFK挂机已关闭",
+            Duration = 3,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+Button = TabHandles.JBTY2:Button({
+    Title = "汉化黑洞",
+    Desc = "让掉落零件围绕人物旋转",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMheidong.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
     Content = "加载成功",
     Duration = 3, -- 3 seconds
     Icon = "layout-grid",
-})
+})        
+        
     end
 })
------------------------------------------------------------------------------------------------子追
-Button = TabHandles.YI:Button({
+
+Button = TabHandles.JBTY2:Button({
+    Title = "汉化飞行V3",
+    Desc = "人物飞行",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMFLYV3.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.JBTY2:Button({
+    Title = "汉化传送",
+    Desc = "人物传送",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/CNFXM/FXM/main/FXMdeliver.lua'))()
+        
+WindUI:Notify({
+    Title = "FXM脚本",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
+    end
+})
+
+Button = TabHandles.JBTY2:Button({
     Title = "子追穿墙",
     Desc = "",
     Locked = false,
@@ -1480,8 +1598,8 @@ Button = TabHandles.YI:Button({
 })
     end
 })
------------------------------------------------------------------------------------------------隐身
-local Button = TabHandles.YI:Button({
+
+local Button = TabHandles.JBTY2:Button({
     Title = "隐身自己",
     Desc = "",
     Locked = false,
@@ -1497,29 +1615,7 @@ local Button = TabHandles.YI:Button({
     end
 })
 
-Button = TabHandles.YI:Button({
-    Title = "透视骨骼",
-    Value = false,    
-    Callback = function(state) 
-        local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
-local Skeletons = {}
-for _, Player in next, game.Players:GetChildren() do
-	table.insert(Skeletons, Library:NewSkeleton(Player, true));
-end
-game.Players.PlayerAdded:Connect(function(Player)
-	table.insert(Skeletons, Library:NewSkeleton(Player, true));
-end)
-                    
-    WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-}) 
-    end
-})
------------------------------------------------------------------------------------------------防甩飞
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "防甩飞",
     Desc = "",
     Locked = false,
@@ -1592,7 +1688,7 @@ WindUI:Notify({
 })
     end
 })
------------------------------------------------------------------------------------------------撸关R15
+
 Button = TabHandles.YI:Button({
     Title = "撸关R15",
     Desc = "",
@@ -1609,7 +1705,7 @@ Button = TabHandles.YI:Button({
         
     end
 })
------------------------------------------------------------------------------------------------撸关R6
+
 Button = TabHandles.YI:Button({
     Title = "撸关R6",
     Desc = "",
@@ -1626,7 +1722,7 @@ Button = TabHandles.YI:Button({
         
     end
 })
------------------------------------------------------------------------------------------------甩飞
+
 Button = TabHandles.YI:Button({
     Title = "甩飞",
     Desc = "",
@@ -2139,145 +2235,6 @@ WindUI:Notify({
 
     end
 })
------------------------------------------------------------------------------------------------穿墙
-Button = TabHandles.YI:Button({
-    Title = "穿墙",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local Noclip = Instance.new("ScreenGui")
-local BG = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Toggle = Instance.new("TextButton")
-local StatusPF = Instance.new("TextLabel")
-local Status = Instance.new("TextLabel")
-local Credit = Instance.new("TextLabel")
-local Plr = Players.LocalPlayer
-local Clipon = false
-
-Noclip.Name = "越 HB穿墙"
-Noclip.Parent = game.CoreGui
-
-BG.Name = "BG"
-BG.Parent = Noclip
-BG.BackgroundColor3 = Color3.new(0.0980392, 0.0980392, 0.0980392)
-BG.BorderColor3 = Color3.new(0.0588235, 0.0588235, 0.0588235)
-BG.BorderSizePixel = 2
-BG.Position = UDim2.new(0.149479166, 0, 0.82087779, 0)
-BG.Size = UDim2.new(0, 210, 0, 127)
-BG.Active = true
-BG.Draggable = true
-
-Title.Name = "Title"
-Title.Parent = BG
-Title.BackgroundColor3 = Color3.new(0.266667, 0.00392157, 0.627451)
-Title.BorderColor3 = Color3.new(0.180392, 0, 0.431373)
-Title.BorderSizePixel = 2
-Title.Size = UDim2.new(0, 210, 0, 33)
-Title.Font = Enum.Font.Highway
-Title.Text = "越 HB穿墙"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.FontSize = Enum.FontSize.Size32
-Title.TextSize = 30
-Title.TextStrokeColor3 = Color3.new(0.180392, 0, 0.431373)
-Title.TextStrokeTransparency = 0
-
-Toggle.Parent = BG
-Toggle.BackgroundColor3 = Color3.new(0.266667, 0.00392157, 0.627451)
-Toggle.BorderColor3 = Color3.new(0.180392, 0, 0.431373)
-Toggle.BorderSizePixel = 2
-Toggle.Position = UDim2.new(0.152380958, 0, 0.374192119, 0)
-Toggle.Size = UDim2.new(0, 146, 0, 36)
-Toggle.Font = Enum.Font.Highway
-Toggle.FontSize = Enum.FontSize.Size28
-Toggle.Text = "开启"
-Toggle.TextColor3 = Color3.new(1, 1, 1)
-Toggle.TextSize = 25
-Toggle.TextStrokeColor3 = Color3.new(0.180392, 0, 0.431373)
-Toggle.TextStrokeTransparency = 0
-
-StatusPF.Name = "StatusPF"
-StatusPF.Parent = BG
-StatusPF.BackgroundColor3 = Color3.new(1, 1, 1)
-StatusPF.BackgroundTransparency = 1
-StatusPF.Position = UDim2.new(0.314285725, 0, 0.708661377, 0)
-StatusPF.Size = UDim2.new(0, 56, 0, 20)
-StatusPF.Font = Enum.Font.Highway
-StatusPF.FontSize = Enum.FontSize.Size24
-StatusPF.Text = "状态:"
-StatusPF.TextColor3 = Color3.new(1, 1, 1)
-StatusPF.TextSize = 20
-StatusPF.TextStrokeColor3 = Color3.new(0.333333, 0.333333, 0.333333)
-StatusPF.TextStrokeTransparency = 0
-StatusPF.TextWrapped = true
-
-Status.Name = "状态"
-Status.Parent = BG
-Status.BackgroundColor3 = Color3.new(1, 1, 1)
-Status.BackgroundTransparency = 1
-Status.Position = UDim2.new(0.580952346, 0, 0.708661377, 0)
-Status.Size = UDim2.new(0, 56, 0, 20)
-Status.Font = Enum.Font.Highway
-Status.FontSize = Enum.FontSize.Size14
-Status.Text = "关闭"
-Status.TextColor3 = Color3.new(0.666667, 0, 0)
-Status.TextScaled = true
-Status.TextSize = 14
-Status.TextStrokeColor3 = Color3.new(0.180392, 0, 0.431373)
-Status.TextWrapped = true
-Status.TextXAlignment = Enum.TextXAlignment.Left
-
-Credit.Name = "Credit"
-Credit.Parent = BG
-Credit.BackgroundColor3 = Color3.new(1, 1, 1)
-Credit.BackgroundTransparency = 1
-Credit.Position = UDim2.new(0.195238099, 0, 0.866141737, 0)
-Credit.Size = UDim2.new(0, 128, 0, 17)
-Credit.Font = Enum.Font.SourceSans
-Credit.FontSize = Enum.FontSize.Size18
-Credit.Text = "越 HB穿墙"
-Credit.TextColor3 = Color3.new(1, 1, 1)
-Credit.TextSize = 16
-Credit.TextStrokeColor3 = Color3.new(0.196078, 0.196078, 0.196078)
-Credit.TextStrokeTransparency = 0
-Credit.TextWrapped = true
-
-Toggle.MouseButton1Click:connect(function()
-	if Status.Text == "关闭" then
-		Clipon = true
-		Status.Text = "开启"
-		Status.TextColor3 = Color3.new(0,185,0)
-		Stepped = game:GetService("RunService").Stepped:Connect(function()
-			if not Clipon == false then
-				for a, b in pairs(Workspace:GetChildren()) do
-                if b.Name == Plr.Name then
-                for i, v in pairs(Workspace[Plr.Name]:GetChildren()) do
-                if v:IsA("BasePart") then
-                v.CanCollide = false
-                end end end end
-			else
-				Stepped:Disconnect()
-			end
-		end)
-	elseif Status.Text == "关闭" then
-		Clipon = false
-		Status.Text = "开启"
-		Status.TextColor3 = Color3.new(170,0,0)
-	end
-end)
-
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})
-
-    end
-})
 
 Button = TabHandles.YI:Button({
     Title = "飞车",
@@ -2420,7 +2377,7 @@ Button = TabHandles.YI:Button({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "爬墙",
     Desc = "",
     Locked = false,
@@ -2437,7 +2394,7 @@ WindUI:Notify({
     end
 })
 
-Button = TabHandles.YI:Button({
+Button = TabHandles.JBTY2:Button({
     Title = "动作",
     Desc = "",
     Locked = false,
@@ -3142,7 +3099,7 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 ---------------------------------------------------------------------------------------------透视功能
-Toggle = TabHandles.ER:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "透视开启", 
     Value = false, 
     Callback = function(Value)
@@ -3150,7 +3107,7 @@ Toggle = TabHandles.ER:Toggle({
     end
 })
 
-Toggle = TabHandles.ER:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "模型透视", 
     Value = false, 
     Callback = function(Value)
@@ -3158,7 +3115,7 @@ Toggle = TabHandles.ER:Toggle({
     end
 })
 
-Toggle = TabHandles.ER:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "方框透视", 
     Value = false, 
     Callback = function(Value)
@@ -3166,9 +3123,58 @@ Toggle = TabHandles.ER:Toggle({
     end
 })
 
+-- 替换为 Toggle 开关框，保留原核心逻辑和通知，仅调整控件类型
+Toggle = TabHandles.JBTY3:Toggle({
+    Title = "透视骨骼",
+    Value = false, -- 初始状态：关闭
+    Callback = function(state) 
+        -- 全局骨骼存储变量，避免重复创建/内存泄漏
+        _G.Skeletons = _G.Skeletons or {}
+        local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Blissful4992/ESPs/main/UniversalSkeleton.lua"))()
 
+        if state then -- 开关开启：加载骨骼透视
+            -- 为已存在的玩家创建骨骼（排除本地玩家）
+            for _, Player in next, game.Players:GetChildren() do
+                if Player ~= game.Players.LocalPlayer then
+                    local newSkeleton = Library:NewSkeleton(Player, true)
+                    table.insert(_G.Skeletons, newSkeleton)
+                end
+            end
+            -- 监听新加入玩家，自动创建骨骼
+            game.Players.PlayerAdded:Connect(function(Player)
+                if Player ~= game.Players.LocalPlayer then
+                    local newSkeleton = Library:NewSkeleton(Player, true)
+                    table.insert(_G.Skeletons, newSkeleton)
+                end
+            end)
+            -- 开启通知
+            WindUI:Notify({
+                Title = "通知",
+                Content = "透视骨骼已开启",
+                Duration = 3,
+                Icon = "layout-grid",
+            })
+        else -- 开关关闭：销毁骨骼+清理资源
+            -- 遍历销毁所有骨骼实例（依赖库的 Destroy 方法）
+            for i, skeleton in ipairs(_G.Skeletons) do
+                if skeleton and skeleton.Destroy then
+                    skeleton:Destroy()
+                end
+            end
+            -- 清空存储表
+            table.clear(_G.Skeletons)
+            -- 关闭通知
+            WindUI:Notify({
+                Title = "通知",
+                Content = "透视骨骼已关闭",
+                Duration = 3,
+                Icon = "layout-grid",
+            })
+        end
+    end
+})
 
-Toggle = TabHandles.ER:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "射线透视", 
     Value = false, 
     Callback = function(Value)
@@ -3176,7 +3182,7 @@ Toggle = TabHandles.ER:Toggle({
     end
 })
 
-Toggle = TabHandles.ER:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "名字透视", 
     Value = false, 
     Callback = function(Value)
@@ -3185,140 +3191,7 @@ Toggle = TabHandles.ER:Toggle({
 })
 
 ---------------------------------------------------------------------------------------------越HB脚本
-Button = TabHandles.gn:Button({
-    Title = "DOORS",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%20DOORS.lua"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})
-    end
-})                
 
-Button = TabHandles.gn:Button({
-    Title = "火箭发射模拟器",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%20%E7%81%AB%E7%AE%AD%E5%8F%91%E5%B0%84%E6%A8%A1%E6%8B%9F%E5%99%A8.lua"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-    end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "战争大亨",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%20%E6%88%98%E4%BA%89%E5%A4%A7%E4%BA%A8.lua"))()       
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})                        
-        
-end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "忍者传奇（收费）",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/obfuscated_script-1759563604610.lua.txt"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "力量传奇",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/obfuscated_script-1759584343565.lua.txt"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-    end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "森林99夜",
-    Desc = "制作完成",
-    Locked = false,
-    Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8AHB%20FXM%2099%E5%A4%9C.lua"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-    end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "环山军区",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%E7%8E%AF%E5%B1%B1%E5%86%9B%E5%8C%BA.lua"))()
-
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-    end
-})
-
-Button = TabHandles.gn:Button({
-    Title = "墨水游戏",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8AHB%20%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F.lua"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
-    end
-})
 -----------------------------------------------------------------------------------------------自然灾害
 Button = TabHandles.ESPgn:Button({
     Title = "黑洞",
