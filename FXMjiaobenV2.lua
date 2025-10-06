@@ -1159,63 +1159,42 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "穿墙", 
     Value = false, 
     Callback = function(Value)
-        local Workspace = game:GetService("Workspace")
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-
-        local Plr = Players.LocalPlayer
-        local SteppedConnection = nil -- 存储循环连接，用于关闭时断开
-
-        -- 先断开已有连接（避免重复创建循环）
-        if SteppedConnection then
-            SteppedConnection:Disconnect()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        
+        -- 创建碰撞组
+        local physicsService = game:GetService("PhysicsService")
+        local noclipGroup = "NoclipGroup"
+        local defaultGroup = "Default"
+        
+        -- 确保碰撞组存在
+        if not physicsService:GetCollisionGroupName(noclipGroup) then
+            physicsService:CreateCollisionGroup(noclipGroup)
+            physicsService:CollisionGroupSetCollidable(noclipGroup, defaultGroup, false)
         end
-
-        if Value then -- 开启穿墙
-            if not Plr.Character then
-                WindUI:Notify({
-                    Title = "FXM脚本",
-                    Content = "角色未加载，无法开启穿墙",
-                    Duration = 3,
-                    Icon = "layout-grid",
-                })
-                return
-            end
-
-            -- 循环设置角色部件碰撞为false
-            SteppedConnection = RunService.Stepped:Connect(function()
-                if not Plr.Character or not Value then
-                    SteppedConnection:Disconnect()
-                    return
+        
+        if Value then
+            -- 开启穿墙
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    physicsService:SetPartCollisionGroup(part, noclipGroup)
                 end
-                for _, v in pairs(Plr.Character:GetChildren()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
+            end
+            
+            -- 监听新加入的部件
+            character.DescendantAdded:Connect(function(descendant)
+                if descendant:IsA("BasePart") then
+                    physicsService:SetPartCollisionGroup(descendant, noclipGroup)
                 end
             end)
-        else -- 关闭穿墙
-            -- 断开循环
-            if SteppedConnection then
-                SteppedConnection:Disconnect()
-            end
-            -- 恢复角色碰撞（可选，按需保留）
-            if Plr.Character then
-                for _, v in pairs(Plr.Character:GetChildren()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = true
-                    end
+        else
+            -- 关闭穿墙
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    physicsService:SetPartCollisionGroup(part, defaultGroup)
                 end
             end
         end
-
-        -- 状态切换通知
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = Value and "开启成功" or "关闭成功",
-            Duration = 3,
-            Icon = "layout-grid",
-        })
     end
 })
 
@@ -1223,44 +1202,12 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "无限跳", 
     Value = false, 
     Callback = function(Value)
-        local Players = game:GetService("Players")
-        local UserInputService = game:GetService("UserInputService")
-        
-        local Plr = Players.LocalPlayer
-        local Jump = Value -- 无限跳状态
-        local JumpConn = nil -- 存储输入连接，用于切换时断开
-        
-        -- 每次切换状态前，先断开之前的JumpRequest连接（关键修复）
-        if JumpConn then
-            JumpConn:Disconnect()
-        end
-
-        -- 若角色未加载，不执行后续逻辑（避免报错）
-        if not Plr.Character then
-            warn("角色未加载，无法启用无限跳")
-            return
-        end
-        local Humanoid = Plr.Character:FindFirstChildOfClass("Humanoid")
-        if not Humanoid then return end
-
-        -- 状态为true（开启）时，绑定跳跃请求
-        if Jump then
-            JumpConn = UserInputService.JumpRequest:Connect(function()
-                -- 防止角色消失/人形失效导致的报错
-                if Plr.Character and Plr.Character:FindFirstChildOfClass("Humanoid") then
-                    Plr.Character.Humanoid:ChangeState("Jumping")
-                end
-            end)
-        end
-
-        -- （可选）状态切换通知
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = Value and "无限跳已开启" or "无限跳已关闭",
-            Duration = 3,
-            Icon = "layout-grid",
-        })
-    end
+Jump = Value
+        game.UserInputService.JumpRequest:Connect(function()
+            if Jump then
+                game.Players.LocalPlayer.Character.Humanoid:ChangeState("Jumping")
+            end
+        end)
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
@@ -1288,45 +1235,35 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "人物燃尽[假延迟]", 
     Value = false, 
     Callback = function(Value)
-        -- 假延迟核心变量（放在Toggle回调内，确保开关状态绑定）
-        local fakeLagEnabled = Value
-        local fakeLagThread
+local fakeLagEnabled = Value
+    local fakeLagThread
 
-        -- 假延迟执行函数（通过锚定HumanoidRootPart制造卡顿）
-        local function toggleFakeLag()
-            local lp = game:GetService("Players").LocalPlayer
-            -- 仅在开关开启（Value=true）时循环执行
-            while fakeLagEnabled do
-                task.wait()
-                local character = lp.Character
-                if character then
-                    local hrp = character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.Anchored = true -- 锚定（卡住）
-                        task.wait(0.2) -- 卡顿持续时间
-                        hrp.Anchored = false -- 取消锚定（恢复）
-                        task.wait()
-                    end
+    -- 假延迟执行函数（通过锚定HumanoidRootPart制造卡顿）
+    local function toggleFakeLag()
+        local lp = game:GetService("Players").LocalPlayer
+        -- 仅在开关开启（Value=true）时循环执行
+        while fakeLagEnabled do
+            task.wait()
+            local character = lp.Character
+            if character then
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.Anchored = true -- 锚定（卡住）
+                    task.wait(0.2) -- 卡顿持续时间
+                    hrp.Anchored = false -- 取消锚定（恢复）
+                    task.wait()
                 end
             end
         end
+    end
 
-        -- 开关开启：启动假延迟协程
-        if fakeLagEnabled then
-            fakeLagThread = coroutine.create(toggleFakeLag)
-            coroutine.resume(fakeLagThread)
-        else
-            -- 开关关闭：停止循环（通过修改变量让while循环退出）
-            fakeLagEnabled = false
-        end
-
-        -- 新增：状态切换提示通知
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = Value and "假延迟已开启" or "假延迟已关闭",
-            Duration = 3,
-            Icon = "layout-grid",
-        })
+    -- 开关开启：启动假延迟协程
+    if fakeLagEnabled then
+        fakeLagThread = coroutine.create(toggleFakeLag)
+        coroutine.resume(fakeLagThread)
+    else
+        -- 开关关闭：停止循环（通过修改变量让while循环退出）
+        fakeLagEnabled = false
     end
 })
 
@@ -1334,143 +1271,112 @@ Toggle = TabHandles.JBTY2:Toggle({
     Title = "布娃娃模式", 
     Value = false, 
     Callback = function(Value)
-        local Players = game:GetService("Players")
-        local player = Players.LocalPlayer
+local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
 
-        local isRagdolled = Value
-        local motorBackup = {}
+    local isRagdolled = Value
+    local motorBackup = {}
 
-        local function getCharacter()
-            return player.Character or player.CharacterAdded:Wait()
-        end
+    local function getCharacter()
+        return player.Character or player.CharacterAdded:Wait()
+    end
 
-        local function toggleRagdoll()
-            local character = getCharacter()
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if not humanoid or humanoid.Health <= 0 then return end
+    local function toggleRagdoll()
+        local character = getCharacter()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid or humanoid.Health <= 0 then return end
 
-            local root = character:FindFirstChild("HumanoidRootPart")
-            if not root then return end
+        local root = character:FindFirstChild("HumanoidRootPart")
+        if not root then return end
 
-            if isRagdolled then
-                -- 开启布娃娃：保留原逻辑
-                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                humanoid.AutoRotate = false
-                motorBackup = {}
+        if isRagdolled then
+            -- 开启布娃娃：保留原逻辑
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            humanoid.AutoRotate = false
+            motorBackup = {}
 
-                for _, joint in ipairs(character:GetDescendants()) do
-                    if joint:IsA("Motor6D") then
-                        local socket = Instance.new("BallSocketConstraint")
-                        local a1 = Instance.new("Attachment")
-                        local a2 = Instance.new("Attachment")
+            for _, joint in ipairs(character:GetDescendants()) do
+                if joint:IsA("Motor6D") then
+                    local socket = Instance.new("BallSocketConstraint")
+                    local a1 = Instance.new("Attachment")
+                    local a2 = Instance.new("Attachment")
 
-                        a1.CFrame = joint.C0
-                        a2.CFrame = joint.C1
-                        a1.Parent = joint.Part0
-                        a2.Parent = joint.Part1
+                    a1.CFrame = joint.C0
+                    a2.CFrame = joint.C1
+                    a1.Parent = joint.Part0
+                    a2.Parent = joint.Part1
 
-                        socket.Attachment0 = a1
-                        socket.Attachment1 = a2
-                        socket.Parent = joint.Parent
-                        socket.LimitsEnabled = true
-                        socket.TwistLimitsEnabled = true
+                    socket.Attachment0 = a1
+                    socket.Attachment1 = a2
+                    socket.Parent = joint.Parent
+                    socket.LimitsEnabled = true
+                    socket.TwistLimitsEnabled = true
 
-                        motorBackup[joint.Name .. "_" .. joint:GetFullName()] = {
-                            Part0 = joint.Part0,
-                            Part1 = joint.Part1,
-                            C0 = joint.C0,
-                            C1 = joint.C1,
-                            Parent = joint.Parent,
-                        }
+                    motorBackup[joint.Name .. "_" .. joint:GetFullName()] = {
+                        Part0 = joint.Part0,
+                        Part1 = joint.Part1,
+                        C0 = joint.C0,
+                        C1 = joint.C1,
+                        Parent = joint.Parent,
+                    }
 
-                        joint:Destroy()
-                    end
+                    joint:Destroy()
                 end
+            end
 
-                root.Velocity = Vector3.new(0, 15, 0)
+            root.Velocity = Vector3.new(0, 15, 0)
 
-            else
-                -- 关闭布娃娃：仅恢复关节+清理约束，删除“重置人物（GettingUp）”相关代码
-                for _, data in pairs(motorBackup) do
-                    local motor = Instance.new("Motor6D")
-                    motor.Name = "RestoredMotor"
-                    motor.Part0 = data.Part0
-                    motor.Part1 = data.Part1
-                    motor.C0 = data.C0
-                    motor.C1 = data.C1
-                    motor.Parent = data.Parent
-                end
-                motorBackup = {}
+        else
+            -- 关闭布娃娃：仅恢复关节+清理约束，删除“重置人物（GettingUp）”相关代码
+            for _, data in pairs(motorBackup) do
+                local motor = Instance.new("Motor6D")
+                motor.Name = "RestoredMotor"
+                motor.Part0 = data.Part0
+                motor.Part1 = data.Part1
+                motor.C0 = data.C0
+                motor.C1 = data.C1
+                motor.Parent = data.Parent
+            end
+            motorBackup = {}
 
-                -- 【核心修改】删除这行：不再让人物自动起身（去掉GettingUp状态切换）
-                -- humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-                humanoid.AutoRotate = true -- 仅保留自动旋转恢复
+            -- 【核心修改】删除这行：不再让人物自动起身（去掉GettingUp状态切换）
+            -- humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            humanoid.AutoRotate = true -- 仅保留自动旋转恢复
 
-                -- 清理残留约束和附件（保留原逻辑）
-                for _, item in ipairs(character:GetDescendants()) do
-                    if item:IsA("BallSocketConstraint") or item:IsA("Attachment") then
-                        item:Destroy()
-                    end
+            -- 清理残留约束和附件（保留原逻辑）
+            for _, item in ipairs(character:GetDescendants()) do
+                if item:IsA("BallSocketConstraint") or item:IsA("Attachment") then
+                    item:Destroy()
                 end
             end
         end
-
-        player.CharacterAdded:Connect(function(char)
-            isRagdolled = false
-            motorBackup = {}
-        end)
-
-        toggleRagdoll()
-
-        -- 新增：状态切换提示通知
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = Value and "布娃娃模式已开启" or "布娃娃模式已关闭",
-            Duration = 3,
-            Icon = "layout-grid",
-        })
     end
+
+    player.CharacterAdded:Connect(function(char)
+        isRagdolled = false
+        motorBackup = {}
+    end)
+
+    toggleRagdoll()
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
     Title = "自动交互", 
     Value = false, 
     Callback = function(state)
-        local autoInteract = false
-        local interactThread -- 存储循环线程，避免重复创建
-
-        -- 停止旧线程（防止开关切换后残留循环）
-        if interactThread then
-            autoInteract = false
-            task.wait() -- 等待旧循环退出
-        end
-
-        if state then
+if state then
             autoInteract = true
-            -- 启动自动交互循环
-            interactThread = task.spawn(function()
-                while autoInteract do
-                    -- 遍历工作区所有子对象，触发所有ProximityPrompt
-                    for _, descendant in pairs(workspace:GetDescendants()) do
-                        if descendant:IsA("ProximityPrompt") then
-                            fireproximityprompt(descendant)
-                        end
+            while autoInteract do
+                for _, descendant in pairs(workspace:GetDescendants()) do
+                    if descendant:IsA("ProximityPrompt") then
+                        fireproximityprompt(descendant)
                     end
-                    task.wait(0.25) -- 交互间隔（可按需调整）
                 end
-            end)
+                task.wait(0.25) -- Adjust the wait time as needed
+            end
         else
             autoInteract = false
         end
-
-        -- 新增：状态切换提示通知
-        WindUI:Notify({
-            Title = "FXM脚本",
-            Content = state and "自动交互已开启" or "自动交互已关闭",
-            Duration = 3,
-            Icon = "layout-grid",
-        })
-    end
 })
 
 Toggle = TabHandles.JBTY2:Toggle({
