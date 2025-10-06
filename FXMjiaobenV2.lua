@@ -3288,7 +3288,7 @@ end
 _G.Skeletons = _G.Skeletons or {}
 _G.SkeletonConnections = _G.SkeletonConnections or {}
 
-Toggle = TabHandles.YI:Toggle({
+Toggle = TabHandles.JBTY3:Toggle({
     Title = "透视骨骼",
     Value = false,
     Callback = function(state) 
