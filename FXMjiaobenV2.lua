@@ -221,38 +221,218 @@ local Paragraph = TabHandles.GGXX1:Paragraph({
 -----------------更新区域------------------
 local Paragraph = TabHandles.GGXX2:Paragraph({
     Title = "FXM脚本重置版0.5:",
-    Desc = "UI界面",
+    Desc = "UI界面、部分移植",
     Image = "rbxassetid://81944629903864",
     ImageSize = 42,
     Thumbnail = "rbxassetid://128537295758977",
     ThumbnailSize = 120,
 })
 -----------------信息区域------------------
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "您的用户名：",
+    Desc = "" .. game.Players.LocalPlayer.Name .. "",
+    Image = "rbxassetid://75035870595229",
+    ImageSize = 42, -- default 30
+    Thumbnail = "rbxassetid://73942828034736",
+    ThumbnailSize = 120, -- Thumbnail height
+    Buttons = {{
+        Title = "复制用户名",
+        Variant = "Primary",
+        Callback = function()
+            -- 复制用户名到剪贴板
+            local userNameText = "" .. game.Players.LocalPlayer.Name
+            setclipboard(userNameText)
 
-local Paragraph = TabHandles.GGXX1:Paragraph({
-    Title = "时间",
-    Desc = "北京时间: 加载中...", -- 初始占位文本
-    ImageSize = 42,  -- 若不需要小图标，这行也可一并删除
-    ThumbnailSize = 120,  -- 若不需要缩略图，这行也可一并删除
+            -- 播放操作成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "HB脚本中心---提示：",
+                Content = "用户名已成功复制！",
+                Icon = "bell",
+                IconThemed = true, -- automatic color icon to theme 
+                Duration = 5
+            })
+
+        end,
+        Icon = "bird"
+    }}
 })
 
--- 整合实时更新北京时间的核心逻辑
-local RunService = game:GetService("RunService")
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "您的注入器信息：",
+    Desc = "你的注入器:" .. identifyexecutor(), -- 显示注入器信息
+    Buttons = {{
+        Title = "复制注入器信息",
+        Icon = "copy", -- 保留复制图标（如需使用bird图标可改为"bird"）
+        Variant = "Primary",
+        Callback = function()
+            -- 复制注入器信息到剪贴板
+            local executorText = "" .. identifyexecutor()
+            setclipboard(executorText)
 
--- 实时更新时间的函数（直接修改Paragraph的Desc文本）
-local function updateTime()
-    local hour = os.date("%H") -- 24小时制小时
-    local minute = os.date("%M") -- 分钟
-    local second = os.date("%S") -- 秒
-    -- 直接更新Desc为格式化后的时间
-    Paragraph.Desc = "北京时间:" .. hour .. "时" .. minute .. "分" .. second .. "秒"
-end
+            -- 播放复制成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
 
--- 立即执行一次，避免初始显示占位文本
-updateTime()
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "注入器信息已成功复制！",
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
 
--- 绑定Heartbeat事件，实时同步时间
-RunService.Heartbeat:Connect(updateTime)
+local Paragraph = Tab:Paragraph({
+    Title = "您的账号注册时间（天）：",
+    Desc = "" .. game:GetService("Players").LocalPlayer.AccountAge .. "",
+    Buttons = {{
+        Title = "复制您的注册时间",
+        Icon = "copy",
+        Variant = "Primary",
+        Callback = function()
+
+            setclipboard(game:GetService("Players").LocalPlayer.AccountAge)
+
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+            WindUI:Notify({
+                Title = "FXM",
+                Content = "已成功复制注册时间！",
+                Icon = "bell",
+                IconThemed = true, -- automatic color icon to theme 
+                Duration = 5
+            })
+
+        end,
+        Icon = "bird"
+    }}
+})
+
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "当前服务器信息：",
+    Desc = "你现在的服务器名称:" .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, -- 显示服务器名称
+    Buttons = {{
+        Title = "复制服务器名称",
+        Icon = "copy",
+        Variant = "Primary",
+        Callback = function()
+            -- 复制服务器名称到剪贴板
+            local serverNameText = "你现在的服务器名称:" .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+            setclipboard(serverNameText)
+
+            -- 播放复制成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "服务器名称已成功复制！",
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
+
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "当前服务器信息：",
+    Desc = "你现在的服务器id:" .. game.GameId, -- 显示服务器ID
+    Buttons = {{
+        Title = "复制服务器ID",
+        Icon = "copy",
+        Variant = "Primary",
+        Callback = function()
+            -- 复制服务器ID到剪贴板
+            local serverIdText = "" .. game.GameId
+            setclipboard(serverIdText)
+
+            -- 播放复制成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "服务器ID已成功复制！",
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
+
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "您的用户信息：",
+    Desc = "你的用户ID:" .. game.Players.LocalPlayer.UserId, -- 显示用户ID
+    Buttons = {{
+        Title = "复制用户ID",
+        Icon = "copy",
+        Variant = "Primary",
+        Callback = function()
+            -- 复制用户ID到剪贴板
+            local userIdText = "" .. game.Players.LocalPlayer.UserId
+            setclipboard(userIdText)
+
+            -- 播放复制成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "用户ID已成功复制！",
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
+
+local Paragraph = TabHandles.GGXX3:Paragraph({
+    Title = "您的客户端信息：",
+    Desc = "获取客户端ID:" .. game:GetService("RbxAnalyticsService"):GetClientId(), -- 显示客户端ID
+    Buttons = {{
+        Title = "复制客户端ID",
+        Icon = "copy",
+        Variant = "Primary",
+        Callback = function()
+            -- 复制客户端ID到剪贴板
+            local clientIdText = "" .. game:GetService("RbxAnalyticsService"):GetClientId()
+            setclipboard(clientIdText)
+
+            -- 播放复制成功音效
+            local Sound = Instance.new("Sound", game:GetService("SoundService"))
+            Sound.SoundId = "rbxassetid://2865227271"
+            Sound:Play()
+
+            -- 弹出复制成功通知
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "客户端ID已成功复制！",
+                Icon = "bell",
+                IconThemed = true,
+                Duration = 5
+            })
+        end
+    }}
+})
 -----------------UI设置------------------
 local Button = TabHandles.UI:Button({
     Title = "自定义界面",
