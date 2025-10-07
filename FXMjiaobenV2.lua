@@ -84,12 +84,12 @@ Window:EditOpenButton({
 })
 
 Window:Tag({
-    Title = "0.1重置版",
+    Title = "重置版V2",
     Color = Color3.fromHex("#30ff6a")
 })
 
 Window:Tag({
-        Title = "永久免费", -- 标签汉化
+        Title = "免费公益", -- 标签汉化
         Color = Color3.fromHex("#315dff")
     })
     local TimeTag = Window:Tag({
@@ -119,7 +119,7 @@ local TabHandles = {
     JBTY1 = Tabs.JBTY:Tab({ Title = "调节区域", Icon = "layout-grid" }),
     JBTY2 = Tabs.JBTY:Tab({ Title = "点击区域", Icon = "layout-grid" }),
     JBTY3 = Tabs.JBTY:Tab({ Title = "绘制区域", Icon = "layout-grid" }),    
-    JBTY4 = Tabs.JBTY:Tab({ Title = "越 HB脚本", Icon = "layout-grid" }),
+    JBTY4 = Tabs.JBTY:Tab({ Title = "玩家区域", Icon = "layout-grid" }),
     RZCQ1 = Tabs.RZCQ:Tab({ Title = "基础区域", Icon = "layout-grid" }),
     RZCQ2 = Tabs.RZCQ:Tab({ Title = "辅助区域", Icon = "layout-grid" }),
     RZCQ3 = Tabs.RZCQ:Tab({ Title = "购买区域", Icon = "layout-grid" }),
@@ -3306,6 +3306,240 @@ Toggle = TabHandles.JBTY3:Toggle({
         getgenv().ShowName = Value
     end
 })
+-----------------玩家区域------------------
+-- 玩家列表和状态变量
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TargetPlayer = nil
+local TeleportLoop = false
+local MonitorLoop = false
+local BringLoop = false
+
+-- 查找玩家函数
+local function FindPlayerByName(playerName)
+    for _, player in pairs(Players:GetPlayers()) do
+        if string.lower(player.Name) == string.lower(playerName) or string.lower(player.DisplayName) == string.lower(playerName) then
+            return player
+        end
+    end
+    return nil
+end
+
+-- 全局玩家名字输入框
+local GlobalPlayerInput = Tabs.JBTY4:Input({
+    Title = "输入目标玩家名字",
+    Placeholder = "输入玩家用户名或显示名",
+    Callback = function(InputText)
+        local player = FindPlayerByName(InputText)
+        if player then
+            TargetPlayer = player
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "已选择玩家: " .. player.Name,
+                Duration = 3,
+            })
+        else
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "未找到玩家: " .. InputText,
+                Duration = 3,
+            })
+            TargetPlayer = nil
+        end
+    end
+})
+
+-- 玩家状态显示
+local PlayerStatusLabel = Tabs.JBTY4:Label({
+    Title = "当前目标玩家",
+    Content = "未选择玩家"
+})
+
+-- 更新玩家状态显示的函数
+local function UpdatePlayerStatus()
+    if TargetPlayer then
+        PlayerStatusLabel:SetContent(TargetPlayer.Name .. " (" .. TargetPlayer.DisplayName .. ")")
+    else
+        PlayerStatusLabel:SetContent("未选择玩家")
+    end
+end
+
+-- 定期更新状态显示
+spawn(function()
+    while true do
+        UpdatePlayerStatus()
+        wait(1)
+    end
+end)
+
+-- 循环传送功能
+local TeleportToggle = Tabs.JBTY4:Toggle({
+    Title = "循环传送",
+    Value = false, 
+    Callback = function(Value)
+        TeleportLoop = Value
+        if Value then
+            if not TargetPlayer then
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "请先输入玩家名字",
+                    Duration = 3,
+                })
+                TeleportToggle:SetValue(false)
+                return
+            end
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "循环传送已开启 - 目标: " .. TargetPlayer.Name,
+                Duration = 3,
+            })
+            -- 循环传送逻辑
+            spawn(function()
+                while TeleportLoop and TargetPlayer do
+                    local targetChar = TargetPlayer.Character
+                    local localChar = LocalPlayer.Character
+                    if targetChar and localChar and targetChar:FindFirstChild("HumanoidRootPart") and localChar:FindFirstChild("HumanoidRootPart") then
+                        localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame
+                    end
+                    wait(0.1)
+                end
+            end)
+        else
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "循环传送已关闭",
+                Duration = 3,
+            })
+        end
+    end
+})
+
+-- 监视玩家功能
+local MonitorToggle = Tabs.JBTY4:Toggle({
+    Title = "监视玩家",
+    Value = false, 
+    Callback = function(Value)
+        MonitorLoop = Value
+        if Value then
+            if not TargetPlayer then
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "请先输入玩家名字",
+                    Duration = 3,
+                })
+                MonitorToggle:SetValue(false)
+                return
+            end
+            
+            local camera = workspace.CurrentCamera
+            
+            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
+                camera.CameraSubject = TargetPlayer.Character.Humanoid
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "监视玩家已开启 - 目标: " .. TargetPlayer.Name,
+                    Duration = 3,
+                })
+            else
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "无法切换视角，玩家不存在或角色未加载",
+                    Duration = 3,
+                })
+                MonitorToggle:SetValue(false)
+            end
+            
+        else
+            local camera = workspace.CurrentCamera
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                camera.CameraSubject = LocalPlayer.Character.Humanoid
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "监视玩家已关闭",
+                    Duration = 3,
+                })
+            end
+        end
+    end
+})
+
+-- 循环把玩家传送过来功能
+local BringToggle = Tabs.JBTY4:Toggle({
+    Title = "循环把玩家传送过来",
+    Value = false, 
+    Callback = function(Value)
+        BringLoop = Value
+        if Value then
+            if not TargetPlayer then
+                WindUI:Notify({
+                    Title = "FXM脚本",
+                    Content = "请先输入玩家名字",
+                    Duration = 3,
+                })
+                BringToggle:SetValue(false)
+                return
+            end
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "循环拉玩家已开启 - 目标: " .. TargetPlayer.Name,
+                Duration = 3,
+            })
+            -- 拉玩家逻辑：传送到前面并背对着本人
+            spawn(function()
+                while BringLoop and TargetPlayer do
+                    local targetChar = TargetPlayer.Character
+                    local localChar = LocalPlayer.Character
+                    if targetChar and localChar and targetChar:FindFirstChild("HumanoidRootPart") and localChar:FindFirstChild("HumanoidRootPart") then
+                        -- 计算玩家前方的位置
+                        local lookVector = localChar.HumanoidRootPart.CFrame.LookVector
+                        local frontPosition = localChar.HumanoidRootPart.Position + lookVector * 5
+                        
+                        -- 计算让目标玩家背对着我们的方向
+                        local oppositeLookVector = -lookVector
+                        
+                        -- 将目标玩家传送到前方位置，并让他背对着我们
+                        targetChar.HumanoidRootPart.CFrame = CFrame.new(frontPosition, frontPosition + oppositeLookVector)
+                    end
+                    wait(0.1)
+                end
+            end)
+        else
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "循环拉玩家已关闭",
+                Duration = 3,
+            })
+        end
+    end
+})
+
+-- 刷新玩家列表按钮
+local RefreshButton = Tabs.JBTY4:Button({
+    Title = "刷新玩家列表",
+    Desc = "显示当前在线玩家",
+    Locked = false,
+    Callback = function()
+        local playerList = "当前在线玩家:\n"
+        local count = 0
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                playerList = playerList .. "• " .. player.Name .. " (" .. player.DisplayName .. ")\n"
+                count = count + 1
+            end
+        end
+        playerList = playerList .. "\n总计: " .. count .. " 名玩家"
+        
+        WindUI:Notify({
+            Title = "玩家列表",
+            Content = playerList,
+            Duration = 5,
+            Icon = "layout-grid",
+        })
+    end
+})
+
+-- 分隔线
+Tabs.GGXX:SectionSeparator()
 -----------------忍者传奇------------------
 local player = game.Players.LocalPlayer
 -- 初始化全局变量
@@ -3553,45 +3787,151 @@ getgenv().AutoFullSell = Value
         })
     end
 })
-
-
-
-
----------------------------------------------------------------------------------------------越HB脚本
-
-Button = TabHandles.JBTY4:Button({
-    Title = "环山军区",
-    Desc = "",
-    Locked = false,
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8A%20HB%E7%8E%AF%E5%B1%B1%E5%86%9B%E5%8C%BA.lua"))()
-
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
+-----------------辅助区域------------------
+Toggle = TabHandles.RZCQ2:Toggle({
+    Title = "快速手里剑", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().FastShuriken = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "快速手里剑已开启" or "快速手里剑已关闭",
+            Duration = 3,
+        })
     end
 })
 
-Button = TabHandles.gn:Button({
-    Title = "墨水游戏",
+Toggle = TabHandles.RZCQ2:Toggle({
+    Title = "慢速手里剑", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().SlowShuriken = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "慢速手里剑已开启" or "慢速手里剑已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ2:Toggle({
+    Title = "隐身", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().Invisible = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "隐身已开启" or "隐身已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Button = TabHandles.RZCQ2:Button({
+    Title = "自动宝箱",
     Desc = "",
     Locked = false,
     Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HB-ksdb/-4/main/%E8%B6%8AHB%20%E5%A2%A8%E6%B0%B4%E6%B8%B8%E6%88%8F.lua"))()
-        
-WindUI:Notify({
-    Title = "通知",
-    Content = "加载成功",
-    Duration = 3, -- 3 seconds
-    Icon = "layout-grid",
-})        
-        
+if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local chests = {"mythicalChest", "goldenChest", "enchantedChest", "magmaChest", "legendsChest", "eternalChest", "saharaChest", "thunderChest", "ancientChest", "midnightShadowChest"}
+            for _, chest in pairs(chests) do
+                if game.Workspace:FindFirstChild(chest) then
+                    game.Workspace[chest].circleInner.CFrame = player.Character.HumanoidRootPart.CFrame
+                    wait(3.5)
+                end
+            end
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "宝箱收集完成",
+                Duration = 3,
+            })
+        end
     end
 })
+-----------------购买区域------------------
+Toggle = TabHandles.RZCQ3:Toggle({
+    Title = "自动购买等级", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoRank = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动买等级已开启" or "自动买等级已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ3:Toggle({
+    Title = "自动购买剑", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoSword = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动买剑已开启" or "自动买剑已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ3:Toggle({
+    Title = "自动购买腰带", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoBelt = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动买腰带已开启" or "自动买腰带已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ3:Toggle({
+    Title = "自动购买技能", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoSkill = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动买技能已开启" or "自动买技能已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ3:Toggle({
+    Title = "自动购买飞镖", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoShuriken = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动买飞镖已开启" or "自动买飞镖已关闭",
+            Duration = 3,
+        })
+    end
+})
+-----------------收集区域------------------
+Toggle = TabHandles.RZCQ4:Toggle({
+    Title = "自动收集元气和金币", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoPetLevel = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动捡气和金币已开启" or "自动捡气和金币已关闭",
+            Duration = 3,
+        })
+    end
+})
+-----------------击杀区域------------------
+
+
+
+
+
 -----------------------------------------------------------------------------------------------自然灾害
 Button = TabHandles.ESPgn:Button({
     Title = "黑洞",
