@@ -3307,8 +3307,6 @@ Toggle = TabHandles.JBTY3:Toggle({
     end
 })
 -----------------玩家区域------------------
-----------------玩家区域------------------
--- 玩家列表和状态变量
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TargetPlayer = nil
@@ -3326,8 +3324,8 @@ local function FindPlayerByName(playerName)
     return nil
 end
 
--- 全局玩家名字输入框
-local GlobalPlayerInput = Tabs.JBTY4:Input({
+-- 全局玩家名字输入框（修正：使用 TabHandles.JBTY4）
+local GlobalPlayerInput = TabHandles.JBTY4:Input({
     Title = "输入目标玩家名字",
     Placeholder = "输入玩家用户名或显示名",
     Callback = function(InputText)
@@ -3350,8 +3348,8 @@ local GlobalPlayerInput = Tabs.JBTY4:Input({
     end
 })
 
--- 玩家状态显示
-local PlayerStatusLabel = Tabs.JBTY4:Label({
+-- 玩家状态显示（修正：使用 TabHandles.JBTY4）
+local PlayerStatusLabel = TabHandles.JBTY4:Label({
     Title = "当前目标玩家",
     Content = "未选择玩家"
 })
@@ -3373,8 +3371,8 @@ spawn(function()
     end
 end)
 
--- 循环传送功能
-local TeleportToggle = Tabs.JBTY4:Toggle({
+-- 循环传送功能（修正：使用 TabHandles.JBTY4）
+local TeleportToggle = TabHandles.JBTY4:Toggle({
     Title = "循环传送",
     Value = false, 
     Callback = function(Value)
@@ -3415,8 +3413,8 @@ local TeleportToggle = Tabs.JBTY4:Toggle({
     end
 })
 
--- 监视玩家功能
-local MonitorToggle = Tabs.JBTY4:Toggle({
+-- 监视玩家功能（修正：使用 TabHandles.JBTY4）
+local MonitorToggle = TabHandles.JBTY4:Toggle({
     Title = "监视玩家",
     Value = false, 
     Callback = function(Value)
@@ -3464,8 +3462,8 @@ local MonitorToggle = Tabs.JBTY4:Toggle({
     end
 })
 
--- 循环把玩家传送过来功能
-local BringToggle = Tabs.JBTY4:Toggle({
+-- 循环把玩家传送过来功能（修正：使用 TabHandles.JBTY4）
+local BringToggle = TabHandles.JBTY4:Toggle({
     Title = "循环把玩家传送过来",
     Value = false, 
     Callback = function(Value)
@@ -3514,8 +3512,8 @@ local BringToggle = Tabs.JBTY4:Toggle({
     end
 })
 
--- 刷新玩家列表按钮
-local RefreshButton = Tabs.JBTY4:Button({
+-- 刷新玩家列表按钮（修正：使用 TabHandles.JBTY4）
+local RefreshButton = TabHandles.JBTY4:Button({
     Title = "刷新玩家列表",
     Desc = "显示当前在线玩家",
     Locked = false,
@@ -3539,8 +3537,8 @@ local RefreshButton = Tabs.JBTY4:Button({
     end
 })
 
--- 分隔线（修正：应该使用 JBTY4 而不是 GGXX）
-Tabs.JBTY4:SectionSeparator()
+-- 分隔线（修正：使用 TabHandles.JBTY4）
+TabHandles.JBTY4:SectionSeparator()
 -----------------忍者传奇------------------
 local player = game.Players.LocalPlayer
 -- 初始化全局变量
