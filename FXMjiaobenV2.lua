@@ -104,6 +104,7 @@ local Tabs = {
     JBGJHZ = Window:Section({ Title = "混杂工具", Opened = true }),
     GDJB = Window:Section({ Title = "更多脚本", Opened = true }),
     JBTY = Window:Section({ Title = "混杂通用", Opened = true }),
+    RZCQ = Window:Section({ Title = "忍者传奇", Opened = true }),    
     gn = Window:Section({ Title = "缝合脚本", Opened = true }),    
 }
 
@@ -119,6 +120,13 @@ local TabHandles = {
     JBTY2 = Tabs.JBTY:Tab({ Title = "点击区域", Icon = "layout-grid" }),
     JBTY3 = Tabs.JBTY:Tab({ Title = "绘制区域", Icon = "layout-grid" }),    
     JBTY4 = Tabs.JBTY:Tab({ Title = "越 HB脚本", Icon = "layout-grid" }),
+    RZCQ1 = Tabs.RZCQ:Tab({ Title = "基础区域", Icon = "layout-grid" }),
+    RZCQ2 = Tabs.RZCQ:Tab({ Title = "辅助区域", Icon = "layout-grid" }),
+    RZCQ3 = Tabs.RZCQ:Tab({ Title = "购买区域", Icon = "layout-grid" }),
+    RZCQ4 = Tabs.RZCQ:Tab({ Title = "收集区域", Icon = "layout-grid" }),
+    RZCQ5 = Tabs.RZCQ:Tab({ Title = "击杀区域", Icon = "layout-grid" }),
+    RZCQ6 = Tabs.RZCQ:Tab({ Title = "传送区域", Icon = "layout-grid" }),
+    RZCQ7 = Tabs.RZCQ:Tab({ Title = "刷物区域", Icon = "layout-grid" }),
     ESPgn = Tabs.gn:Tab({ Title = "自然灾害", Icon = "layout-grid" }),
     pbgn = Tabs.gn:Tab({ Title = "被遗弃", Icon = "layout-grid" }),
     tzgn = Tabs.gn:Tab({ Title = "最坚强战场", Icon = "layout-grid" }),
@@ -133,6 +141,8 @@ local TabHandles = {
     H = Tabs.gn:Tab({ Title = "墨水游戏", Icon = "layout-grid" }),
            
 }
+
+
 -----------------公告区域------------------
 local Paragraph = TabHandles.GGXX1:Paragraph({
     Title = "欢迎使用FXM脚本",
@@ -1064,113 +1074,66 @@ Slider = TabHandles.JBTY1:Slider({
 })
 
 Slider = TabHandles.JBTY1:Slider({
-    Title = "旋转速度",
+    Title = "旋转速度", 
     Value = {
         Min = 0,
-        Max = 1000,
+        Max = 100,
         Default = 0,
     },
-    Step = 0.1,
+    Step = 1,
     Callback = function(Value)
-        -- 使用全局变量保持状态
-        if not _G.SpinbotData then
-            _G.SpinbotData = {
-                speed = 0,
-                velocity = nil,
-                characterAddedConnection = nil,
-                originalCFrame = nil,
-                originalAutoRotate = true
-            }
-        end
-        
-        local data = _G.SpinbotData
-        data.speed = Value
-        
-        local plr = game:GetService("Players").LocalPlayer
-        local RunService = game:GetService("RunService")
-        
-        -- 旋转功能函数
-        local function setupSpinbot(character)
-            -- 等待角色加载完成
-            local hum = character:WaitForChild("Humanoid")
-            local humRoot = character:WaitForChild("HumanoidRootPart")
-            
-            -- 保存原始状态
-            if not data.originalCFrame then
-                data.originalCFrame = humRoot.CFrame
-                data.originalAutoRotate = hum.AutoRotate
-            end
-            
-            -- 清理旧的旋转组件
-            if data.velocity then
-                data.velocity:Destroy()
-                data.velocity = nil
-            end
-            
-            -- 移除可能存在的旧旋转组件
-            local oldVelocity = humRoot:FindFirstChild("Spinbot")
-            if oldVelocity then
-                oldVelocity:Destroy()
-            end
-            
-            -- 应用新的旋转设置
-            if data.speed > 0 then
-                hum.AutoRotate = false -- 关闭自动转向
-                
-                -- 确保有RootAttachment
-                local rootAttachment = humRoot:FindFirstChild("RootAttachment")
-                if not rootAttachment then
-                    rootAttachment = Instance.new("Attachment")
-                    rootAttachment.Name = "RootAttachment"
-                    rootAttachment.Parent = humRoot
-                end
-                
-                -- 创建旋转组件并应用速度
-                data.velocity = Instance.new("AngularVelocity")
-                data.velocity.Attachment0 = rootAttachment
-                data.velocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
-                data.velocity.MaxTorque = math.huge
-                data.velocity.AngularVelocity = Vector3.new(0, data.speed, 0)
-                data.velocity.Parent = humRoot
-                data.velocity.Name = "Spinbot"
-                
-            else
-                -- 速度为0时，恢复默认状态
-                hum.AutoRotate = data.originalAutoRotate
-                
-                -- 恢复角色到原始朝向
-                if data.originalCFrame then
-                    -- 使用一个小循环来确保角色朝向正确恢复
-                    local startTime = tick()
-                    local connection
-                    connection = RunService.Heartbeat:Connect(function()
-                        if tick() - startTime < 2 then -- 2秒内持续修正
-                            humRoot.CFrame = CFrame.new(humRoot.Position, humRoot.Position + data.originalCFrame.LookVector)
-                        else
-                            connection:Disconnect()
-                        end
-                    end)
-                end
-            end
-        end
-        
-        -- 处理当前角色
-        if plr.Character then
-            setupSpinbot(plr.Character)
-        end
-        
-        -- 监听角色重生
-        if not data.characterAddedConnection then
-            data.characterAddedConnection = plr.CharacterAdded:Connect(function(character)
-                task.wait(1) -- 等待角色完全加载
-                -- 重置原始状态记录
-                data.originalCFrame = nil
-                data.originalAutoRotate = true
-                setupSpinbot(character)
-            end)
-        end
+        _G.SpinSpeed = Value
     end
 })
+
+Button = TabHandles.JBTY1:Button({
+    Title = "确认开启",
+    Desc = "开启旋转功能第2步",
+    Locked = false,
+    Callback = function()
+        _G.SpinEnabled = true
+        
+        local plr = game:GetService("Players").LocalPlayer
+        local UIS = game:GetService("UserInputService")
+        
+        -- 等待角色加载完成
+        repeat task.wait() until plr.Character
+        local character = plr.Character
+        local hum = character:WaitForChild("Humanoid")
+        local humRoot = character:WaitForChild("HumanoidRootPart")
+        local velocity = nil -- 旋转组件变量
+        
+        -- 初始化旋转逻辑：仅当speed大于0时才创建旋转组件
+        if _G.SpinSpeed > 0 then
+            hum.AutoRotate = false -- 关闭自动转向
+            -- 创建旋转组件并应用速度
+            velocity = Instance.new("AngularVelocity")
+            velocity.Attachment0 = humRoot:WaitForChild("RootAttachment")
+            velocity.MaxTorque = math.huge
+            velocity.AngularVelocity = Vector3.new(0, _G.SpinSpeed, 0) -- 应用设置的速度
+            velocity.Parent = humRoot
+            velocity.Name = "Spinbot"
+            print("旋转已启动，当前速度：" .. _G.SpinSpeed)
+        else
+            -- speed为0及以下时，保持角色默认状态
+            hum.AutoRotate = true
+            -- 如果存在之前的旋转组件，则移除
+            if humRoot:FindFirstChild("Spinbot") then
+                humRoot.Spinbot:Destroy()
+            end
+            print("速度设置为0或以下，不启动旋转，角色保持默认状态")
+        end
+        
+        WindUI:Notify({
+            Title = "FXM",
+            Content = "旋转设置成功!",
+            Duration = 3, -- 3 seconds
+            Icon = "layout-grid",
+        })
+    end
+})
+
+TabHandles.JBTY1:Divider()
 
 Slider = TabHandles.JBTY1:Slider({
     Title = "触碰范围",
@@ -1217,6 +1180,144 @@ WindUI:Notify({
     Icon = "layout-grid",
 })        
         
+    end
+})
+
+-- 平移加速距离滑块
+Slider = TabHandles.JBTY1:Slider({
+    Title = "平移速度",
+    Value = {
+        Min = 1,
+        Max = 50,
+        Default = 5,
+    },
+    Step = 1,
+    Callback = function(Value)
+        _G.TeleportDistance = Value
+    end
+})
+
+-- 启用平移加速开关
+Toggle = TabHandles.JBTY1:Toggle({
+    Title = "启用加速",
+    Default = false,
+    Callback = function(Value)
+        _G.TeleportSpeedEnabled = Value
+        
+        if Value then
+            -- 启用平移加速
+            local player = game:GetService("Players").LocalPlayer
+            
+            -- 等待角色加载
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:WaitForChild("Humanoid")
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            
+            -- 使用RenderStepped持续检测移动状态
+            _G.TeleportConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                if _G.TeleportSpeedEnabled and character and humanoid and rootPart then
+                    -- 检查是否在移动（MoveDirection的长度大于0表示在移动）
+                    local moveDirection = humanoid.MoveDirection
+                    if moveDirection.Magnitude > 0 then
+                        -- 计算传送目标位置
+                        local teleportDistance = _G.TeleportDistance or 5
+                        local targetPosition = rootPart.Position + (moveDirection.Unit * teleportDistance)
+                        
+                        -- 根据选择的模式计算朝向
+                        local lookAtPosition
+                        local mode = _G.WalkDirectionMode or "常规模式"
+                        
+                        if mode == "常规模式" then
+                            -- 正常模式：面向移动方向
+                            lookAtPosition = targetPosition + moveDirection
+                        else -- 相反模式
+                            -- 相反模式：背对移动方向（有趣的bug效果）
+                            lookAtPosition = targetPosition - moveDirection
+                        end
+                        
+                        local newCFrame
+                        if _G.SmoothRotation then
+                            -- 平滑旋转
+                            local currentCFrame = rootPart.CFrame
+                            local goalCFrame = CFrame.new(targetPosition, lookAtPosition)
+                            local smoothness = _G.RotationSmoothness or 5
+                            newCFrame = currentCFrame:Lerp(goalCFrame, 1 / smoothness)
+                        else
+                            -- 直接旋转
+                            newCFrame = CFrame.new(targetPosition, lookAtPosition)
+                        end
+                        
+                        -- 执行传送
+                        rootPart.CFrame = newCFrame
+                    end
+                end
+            end)
+            
+            WindUI:Notify({
+                Title = "FXM",
+                Content = "平移加速已启用!",
+                Duration = 3,
+                Icon = "rocket",
+            })
+        else
+            -- 禁用平移加速
+            if _G.TeleportConnection then
+                _G.TeleportConnection:Disconnect()
+                _G.TeleportConnection = nil
+            end
+            
+            WindUI:Notify({
+                Title = "FXM",
+                Content = "平移加速已关闭!",
+                Duration = 3,
+                Icon = "circle-stop",
+            })
+        end
+    end
+})
+
+local OppositeWalkToggle = TabHandles.JBTY1:Toggle({
+    Title = "反面移动姿势",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            -- 如果开启反面姿势，先关闭常规姿势
+            if NormalWalkToggle then
+                NormalWalkToggle:Set(false)
+            end
+            _G.WalkDirectionMode = "相反模式"
+            WindUI:Notify({
+                Title = "FXM",
+                Content = "已启用反面移动姿势",
+                Duration = 3,
+                Icon = "user-x"
+            })
+        else
+            _G.WalkDirectionMode = nil
+        end
+    end
+})
+
+-- 平滑旋转选项
+Toggle = TabHandles.JBTY1:Toggle({
+    Title = "平滑旋转",
+    Default = true,
+    Callback = function(Value)
+        _G.SmoothRotation = Value
+    end
+})
+
+-- 旋转平滑度滑块
+Slider = TabHandles.JBTY1:Slider({
+    Title = "旋转平滑度",
+    Value = {
+        Min = 1,
+        Max = 10,
+        Default = 5,
+    },
+    Step = 1,
+    Callback = function(Value)
+        _G.RotationSmoothness = Value
     end
 })
 
@@ -2411,143 +2512,36 @@ WindUI:Notify({
 })
 
 Button = TabHandles.JBTY2:Button({
-    Title = "飞车",
+    Title = "踏空行走",
     Desc = "",
     Locked = false,
     Callback = function()
-            local Speed = 100
-
-	-- Gui to Lua
-	-- Version: 3.2
-	local HumanoidRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-	-- Instances:
-
-	local ScreenGui = Instance.new("ScreenGui")
-	local W = Instance.new("TextButton")
-	local S = Instance.new("TextButton")
-	local A = Instance.new("TextButton")
-	local D = Instance.new("TextButton")
-	local Fly = Instance.new("TextButton")
-	local unfly = Instance.new("TextButton")
-	local StopFly = Instance.new("TextButton")
-
-	--Properties:
-
-	ScreenGui.Parent = game.CoreGui
-	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-	unfly.Name = "上"
-	unfly.Parent = ScreenGui
-	unfly.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	unfly.Position = UDim2.new(0.694387913, 0, 0.181818187, 0)
-	unfly.Size = UDim2.new(0, 72, 0, 50)
-	unfly.Font = Enum.Font.SourceSans
-	unfly.Text = "停止飞行"
-	unfly.TextColor3 = Color3.fromRGB(127, 34, 548)
-	unfly.TextScaled = true
-	unfly.TextSize = 14.000
-	unfly.TextWrapped = 
-		unfly.MouseButton1Down:Connect(function()
-		HumanoidRP:FindFirstChildOfClass("BodyVelocity"):Destroy()
-		HumanoidRP:FindFirstChildOfClass("BodyGyro"):Destroy()
-	end)
-
-	StopFly.Name = "关闭飞行"
-	StopFly.Parent = ScreenGui
-	StopFly.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	StopFly.Position = UDim2.new(0.695689976, 0, 0.0213903747, 0)
-	StopFly.Size = UDim2.new(0, 71, 0, 50)
-	StopFly.Font = Enum.Font.SourceSans
-	StopFly.Text = "关闭飞行"
-	StopFly.TextColor3 = Color3.fromRGB(170, 0, 255)
-	StopFly.TextScaled = true
-	StopFly.TextSize = 14.000
-	StopFly.TextWrapped = true
-	StopFly.MouseButton1Down:Connect(function()
-		HumanoidRP.Anchored = true
-	end)
-
-	Fly.Name = "开启飞车"
-	Fly.Parent = ScreenGui
-	Fly.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Fly.Position = UDim2.new(0.588797748, 0, 0.0213903747, 0)
-	Fly.Size = UDim2.new(0, 66, 0, 50)
-	Fly.Font = Enum.Font.SourceSans
-	Fly.Text = "飞行"
-	Fly.TextColor3 = Color3.fromRGB(170, 0, 127)
-	Fly.TextScaled = true
-	Fly.TextSize = 14.000
-	Fly.TextWrapped = true
-	Fly.MouseButton1Down:Connect(function()
-		local BV = Instance.new("BodyVelocity",HumanoidRP)
-		local BG = Instance.new("BodyGyro",HumanoidRP)
-		BG.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
-		BG.D = 5000
-		BG.P = 50000
-		BG.CFrame = game.Workspace.CurrentCamera.CFrame
-		BV.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
-	end)
-
-	W.Name = "W"
-	W.Parent = ScreenGui
-	W.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	W.Position = UDim2.new(0.161668837, 0, 0.601604283, 0)
-	W.Size = UDim2.new(0, 58, 0, 50)
-	W.Font = Enum.Font.SourceSans
-	W.Text = "↑"
-	W.TextColor3 = Color3.fromRGB(226, 226, 526)
-	W.TextScaled = true
-	W.TextSize = 5.000
-	W.TextWrapped = true
-	W.MouseButton1Down:Connect(function()
-		HumanoidRP.Anchored = false
-		HumanoidRP:FindFirstChildOfClass("BodyVelocity"):Destroy()
-		HumanoidRP:FindFirstChildOfClass("BodyGyro"):Destroy()
-		wait(.1)
-		local BV = Instance.new("BodyVelocity",HumanoidRP)
-		local BG = Instance.new("BodyGyro",HumanoidRP)
-		BG.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
-		BG.D = 50000
-		BG.P = 50000
-		BG.CFrame = game.Workspace.CurrentCamera.CFrame
-		BV.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
-		BV.Velocity = game.Workspace.CurrentCamera.CFrame.LookVector * Speed
-	end)
-
-
-	S.Name = "S"
-	S.Parent = ScreenGui
-	S.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	S.Position = UDim2.new(0.161668837, 0, 0.735294104, 0)
-	S.Size = UDim2.new(0, 58, 0, 50)
-	S.Font = Enum.Font.SourceSans
-	S.Text = "↓"
-	S.TextColor3 = Color3.fromRGB(255, 255, 255)
-	S.TextScaled = true
-	S.TextSize = 14.000
-	S.TextWrapped = true
-	S.MouseButton1Down:Connect(function()
-		HumanoidRP.Anchored = false
-		HumanoidRP:FindFirstChildOfClass("BodyVelocity"):Destroy()
-		HumanoidRP:FindFirstChildOfClass("BodyGyro"):Destroy()
-		wait(.1)
-		local BV = Instance.new("BodyVelocity",HumanoidRP)
-		local BG = Instance.new("BodyGyro",HumanoidRP)
-		BG.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
-		BG.D = 5000
-		BG.P = 50000
-		BG.CFrame = game.Workspace.CurrentCamera.CFrame
-		BV.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
-		BV.Velocity = game.Workspace.CurrentCamera.CFrame.LookVector * -Speed
-	end)
-	
-	WindUI:Notify({
+loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Float'))()
+        
+WindUI:Notify({
     Title = "通知",
     Content = "加载成功",
     Duration = 3, -- 3 seconds
     Icon = "layout-grid",
+})        
+        
+    end
 })
-	
+
+Button = TabHandles.JBTY2:Button({
+    Title = "飞车",
+    Desc = "",
+    Locked = false,
+    Callback = function()
+loadstring(game:HttpGet("https://pastebin.com/raw/G3GnBCyC", true))()
+        
+WindUI:Notify({
+    Title = "通知",
+    Content = "加载成功",
+    Duration = 3, -- 3 seconds
+    Icon = "layout-grid",
+})        
+        
     end
 })
 
@@ -3312,6 +3306,256 @@ Toggle = TabHandles.JBTY3:Toggle({
         getgenv().ShowName = Value
     end
 })
+-----------------忍者传奇------------------
+local player = game.Players.LocalPlayer
+-- 初始化全局变量
+getgenv().AutoSwing = false
+getgenv().AutoSell = false
+getgenv().AutoFullSell = false
+getgenv().AutoPetLevel = false
+getgenv().AutoRobotBoss = false
+getgenv().AutoEternalBoss = false
+getgenv().AutoAncientBoss = false
+getgenv().AutoSantaBoss = false
+getgenv().AutoAllBosses = false
+getgenv().AutoRank = false
+getgenv().AutoSword = false
+getgenv().AutoBelt = false
+getgenv().AutoSkill = false
+getgenv().AutoShuriken = false
+getgenv().AutoOpenEgg = false
+getgenv().AutoBuyTwinBirdies = false
+getgenv().FastShuriken = false
+getgenv().SlowShuriken = false
+getgenv().Invisible = false
+getgenv().AntiAFK = true
+
+-- 自动挥刀
+spawn(function()
+    while wait(0.1) do
+        if getgenv().AutoSwing and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if player.Character:FindFirstChildOfClass("Tool") then
+                player.ninjaEvent:FireServer("swingKatana")
+            else
+                for _, v in pairs(player.Backpack:GetChildren()) do
+                    if v.ClassName == "Tool" and v:FindFirstChild("attackKatanaScript") then
+                        player.Character.Humanoid:EquipTool(v)
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- 自动出售
+spawn(function()
+    while wait(0.05) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if getgenv().AutoSell then
+                game.Workspace.sellAreaCircles.sellAreaCircle7.circleInner.CFrame = player.Character.HumanoidRootPart.CFrame
+                wait(0.1)
+                game.Workspace.sellAreaCircles.sellAreaCircle7.circleInner.CFrame = game.Workspace.Part.CFrame
+            end
+            if getgenv().AutoFullSell and player.PlayerGui.gameGui.maxNinjitsuMenu.Visible then
+                game.Workspace.sellAreaCircles.sellAreaCircle7.circleInner.CFrame = player.Character.HumanoidRootPart.CFrame
+                wait(0.05)
+                game.Workspace.sellAreaCircles.sellAreaCircle7.circleInner.CFrame = game.Workspace.Part.CFrame
+            end
+        end
+    end
+end)
+
+-- 自动捡金币
+spawn(function()
+    while wait(0.05) do
+        if getgenv().AutoPetLevel and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, v in pairs(game.Workspace.Hoops:GetDescendants()) do
+                if v.ClassName == "MeshPart" and v:FindFirstChild("touchPart") then
+                    v.touchPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                end
+            end
+        end
+    end
+end)
+
+-- Boss击杀函数
+local function autoBoss(bossName, toggle)
+    spawn(function()
+        while wait(0.1) do
+            if getgenv()[toggle] and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local boss = game.Workspace.bossFolder:FindFirstChild(bossName)
+                if boss and boss:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame
+                    if player.Character:FindFirstChildOfClass("Tool") then
+                        player.Character:FindFirstChildOfClass("Tool"):Activate()
+                    end
+                end
+            end
+        end
+    end)
+end
+
+autoBoss("RobotBoss", "AutoRobotBoss")
+autoBoss("EternalBoss", "AutoEternalBoss")
+autoBoss("AncientMagmaBoss", "AutoAncientBoss")
+autoBoss("Samurai Santa", "AutoSantaBoss")
+
+-- 自动杀全部Boss
+spawn(function()
+    while wait(0.1) do
+        if getgenv().AutoAllBosses and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local bosses = {"Samurai Santa", "AncientMagmaBoss", "EternalBoss", "RobotBoss"}
+            for _, bossName in pairs(bosses) do
+                local boss = game.Workspace.bossFolder:FindFirstChild(bossName)
+                if boss and boss:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame
+                    if player.Character:FindFirstChildOfClass("Tool") then
+                        player.Character:FindFirstChildOfClass("Tool"):Activate()
+                    end
+                    break
+                end
+            end
+        end
+    end
+end)
+
+-- 自动购买函数
+local function autoBuy(event, arg, toggle)
+    spawn(function()
+        while wait(0.5) do
+            if getgenv()[toggle] and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                if type(arg) == "table" then
+                    for _, v in pairs(arg) do
+                        player.ninjaEvent:FireServer(event, v)
+                    end
+                else
+                    for _, v in pairs(arg:GetChildren()) do
+                        player.ninjaEvent:FireServer(event, v.Name)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+autoBuy("buyAllSwords", {"Ground", "Astral Island", "Space Island", "Tundra Island", "Eternal Island", "Sandstorm", "Thunderstorm", "Ancient Inferno Island", "Midnight Shadow Island", "Mythical Souls Island", "Winter Wonder Island"}, "AutoSword")
+autoBuy("buyAllBelts", {"Ground", "Astral Island", "Space Island", "Tundra Island", "Eternal Island", "Sandstorm", "Thunderstorm", "Ancient Inferno Island", "Midnight Shadow Island", "Mythical Souls Island", "Winter Wonder Island"}, "AutoBelt")
+autoBuy("buyAllSkills", {"Ground", "Astral Island", "Space Island", "Tundra Island", "Eternal Island", "Sandstorm", "Thunderstorm", "Ancient Inferno Island", "Midnight Shadow Island", "Mythical Souls Island", "Winter Wonder Island"}, "AutoSkill")
+autoBuy("buyRank", game:GetService("ReplicatedStorage").Ranks.Ground, "AutoRank")
+autoBuy("buyAllShurikens", {"Ground", "Astral Island", "Space Island", "Tundra Island", "Eternal Island", "Sandstorm", "Thunderstorm", "Ancient Inferno Island", "Midnight Shadow Island", "Mythical Souls Island", "Winter Wonder Island"}, "AutoShuriken")
+
+-- 自动开蛋
+spawn(function()
+    while wait(0.1) do
+        if getgenv().AutoOpenEgg and getgenv().SelectedCrystal then
+            game:GetService("ReplicatedStorage").rEvents.openCrystalRemote:InvokeServer("openCrystal", getgenv().SelectedCrystal)
+        end
+    end
+end)
+
+-- 自动购买双元素小鸟
+spawn(function()
+    while wait(0.5) do
+        if getgenv().AutoBuyTwinBirdies then
+            game:GetService("ReplicatedStorage").cPetShopRemote:InvokeServer(game:GetService("ReplicatedStorage").cPetShopFolder:FindFirstChild("Twin Element Birdies"))
+        end
+    end
+end)
+
+-- 手里剑速度和隐身
+spawn(function()
+    while wait(0.1) do
+        if getgenv().Invisible then
+            player.ninjaEvent:FireServer("goInvisible")
+        end
+        if getgenv().FastShuriken and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, p in pairs(game.Workspace.shurikensFolder:GetChildren()) do
+                if p.Name == "Handle" and p:FindFirstChild("BodyVelocity") then
+                    local bv = p:FindFirstChildOfClass("BodyVelocity")
+                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bv.Velocity = Vector3.new(1000, 0, 1000)
+                end
+            end
+        end
+        if getgenv().SlowShuriken and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, p in pairs(game.Workspace.shurikensFolder:GetChildren()) do
+                if p.Name == "Handle" and p:FindFirstChild("BodyVelocity") then
+                    local bv = p:FindFirstChildOfClass("BodyVelocity")
+                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bv.Velocity = Vector3.new(35, 0, 35)
+                end
+            end
+        end
+    end
+end)
+
+-- 防AFK
+local vu = game:GetService("VirtualUser")
+spawn(function()
+    while wait(1) do
+        if getgenv().AntiAFK then
+            vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        end
+    end
+end)
+
+-- 自动刷金币
+spawn(function()
+    while wait(0.1) do
+        if isAutoCoin then
+            local rEvents = game:GetService("ReplicatedStorage"):FindFirstChild("rEvents")
+            local event = rEvents and rEvents:FindFirstChild("zenMasterEvent")
+            if event then
+                event:FireServer("convertGems", gemValue)
+            end
+        end
+    end
+end)
+-----------------基础区域------------------
+Toggle = TabHandles.RZCQ1:Toggle({
+    Title = "自动挥剑", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoSwing = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动挥刀已开启" or "自动挥刀已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ1:Toggle({
+    Title = "自动出售", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoSell = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动出售已开启" or "自动出售已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+Toggle = TabHandles.RZCQ1:Toggle({
+    Title = "自动全部出售", 
+    Value = false, 
+    Callback = function(Value)
+getgenv().AutoFullSell = Value
+        WindUI:Notify({
+            Title = "FXM脚本",
+            Content = Value and "自动全部出售已开启" or "自动全部出售已关闭",
+            Duration = 3,
+        })
+    end
+})
+
+
+
 
 ---------------------------------------------------------------------------------------------越HB脚本
 
