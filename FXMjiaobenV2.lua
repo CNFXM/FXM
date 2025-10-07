@@ -3307,12 +3307,9 @@ Toggle = TabHandles.JBTY3:Toggle({
     end
 })
 -----------------玩家区域------------------
+----------------玩家区域------------------
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local TargetPlayer = nil
-local TeleportLoop = false
-local MonitorLoop = false
-local BringLoop = false
 
 -- 查找玩家函数
 local function FindPlayerByName(playerName)
@@ -3324,17 +3321,21 @@ local function FindPlayerByName(playerName)
     return nil
 end
 
--- 全局玩家名字输入框（修正：使用 TabHandles.JBTY4）
-local GlobalPlayerInput = TabHandles.JBTY4:Input({
-    Title = "输入目标玩家名字",
-    Placeholder = "输入玩家用户名或显示名",
+-- ========== 循环传送功能 ==========
+local TeleportTarget = nil
+local TeleportLoop = false
+
+-- 循环传送输入框
+local TeleportInput = TabHandles.JBTY4:Input({
+    Title = "循环传送 - 输入玩家名字",
+    Placeholder = "输入要传送跟随的玩家",
     Callback = function(InputText)
         local player = FindPlayerByName(InputText)
         if player then
-            TargetPlayer = player
+            TeleportTarget = player
             WindUI:Notify({
                 Title = "FXM脚本",
-                Content = "已选择玩家: " .. player.Name,
+                Content = "循环传送目标: " .. player.Name,
                 Duration = 3,
             })
         else
@@ -3343,42 +3344,25 @@ local GlobalPlayerInput = TabHandles.JBTY4:Input({
                 Content = "未找到玩家: " .. InputText,
                 Duration = 3,
             })
-            TargetPlayer = nil
+            TeleportTarget = nil
         end
     end
 })
 
--- 玩家状态显示（修正：使用 TabHandles.JBTY4）
-local PlayerStatusLabel = TabHandles.JBTY4:Label({
-    Title = "当前目标玩家",
+-- 循环传送状态显示
+local TeleportStatus = TabHandles.JBTY4:Label({
+    Title = "循环传送目标",
     Content = "未选择玩家"
 })
 
--- 更新玩家状态显示的函数
-local function UpdatePlayerStatus()
-    if TargetPlayer then
-        PlayerStatusLabel:SetContent(TargetPlayer.Name .. " (" .. TargetPlayer.DisplayName .. ")")
-    else
-        PlayerStatusLabel:SetContent("未选择玩家")
-    end
-end
-
--- 定期更新状态显示
-spawn(function()
-    while true do
-        UpdatePlayerStatus()
-        wait(1)
-    end
-end)
-
--- 循环传送功能（修正：使用 TabHandles.JBTY4）
+-- 循环传送开关
 local TeleportToggle = TabHandles.JBTY4:Toggle({
-    Title = "循环传送",
+    Title = "开启循环传送",
     Value = false, 
     Callback = function(Value)
         TeleportLoop = Value
         if Value then
-            if not TargetPlayer then
+            if not TeleportTarget then
                 WindUI:Notify({
                     Title = "FXM脚本",
                     Content = "请先输入玩家名字",
@@ -3389,13 +3373,13 @@ local TeleportToggle = TabHandles.JBTY4:Toggle({
             end
             WindUI:Notify({
                 Title = "FXM脚本",
-                Content = "循环传送已开启 - 目标: " .. TargetPlayer.Name,
+                Content = "循环传送已开启 - 目标: " .. TeleportTarget.Name,
                 Duration = 3,
             })
             -- 循环传送逻辑
             spawn(function()
-                while TeleportLoop and TargetPlayer do
-                    local targetChar = TargetPlayer.Character
+                while TeleportLoop and TeleportTarget do
+                    local targetChar = TeleportTarget.Character
                     local localChar = LocalPlayer.Character
                     if targetChar and localChar and targetChar:FindFirstChild("HumanoidRootPart") and localChar:FindFirstChild("HumanoidRootPart") then
                         localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame
@@ -3413,14 +3397,60 @@ local TeleportToggle = TabHandles.JBTY4:Toggle({
     end
 })
 
--- 监视玩家功能（修正：使用 TabHandles.JBTY4）
+-- 更新循环传送状态
+spawn(function()
+    while true do
+        local status = TeleportTarget and TeleportTarget.Name or "未选择玩家"
+        TeleportStatus:SetContent(status)
+        wait(1)
+    end
+end)
+
+-- 分隔线
+TabHandles.JBTY4:SectionSeparator()
+
+-- ========== 监视玩家功能 ==========
+local MonitorTarget = nil
+local MonitorLoop = false
+
+-- 监视玩家输入框
+local MonitorInput = TabHandles.JBTY4:Input({
+    Title = "监视玩家 - 输入玩家名字",
+    Placeholder = "输入要监视的玩家",
+    Callback = function(InputText)
+        local player = FindPlayerByName(InputText)
+        if player then
+            MonitorTarget = player
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "监视目标: " .. player.Name,
+                Duration = 3,
+            })
+        else
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "未找到玩家: " .. InputText,
+                Duration = 3,
+            })
+            MonitorTarget = nil
+        end
+    end
+})
+
+-- 监视玩家状态显示
+local MonitorStatus = TabHandles.JBTY4:Label({
+    Title = "监视玩家目标",
+    Content = "未选择玩家"
+})
+
+-- 监视玩家开关
 local MonitorToggle = TabHandles.JBTY4:Toggle({
-    Title = "监视玩家",
+    Title = "开启监视玩家",
     Value = false, 
     Callback = function(Value)
         MonitorLoop = Value
         if Value then
-            if not TargetPlayer then
+            if not MonitorTarget then
                 WindUI:Notify({
                     Title = "FXM脚本",
                     Content = "请先输入玩家名字",
@@ -3432,11 +3462,11 @@ local MonitorToggle = TabHandles.JBTY4:Toggle({
             
             local camera = workspace.CurrentCamera
             
-            if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("Humanoid") then
-                camera.CameraSubject = TargetPlayer.Character.Humanoid
+            if MonitorTarget and MonitorTarget.Character and MonitorTarget.Character:FindFirstChild("Humanoid") then
+                camera.CameraSubject = MonitorTarget.Character.Humanoid
                 WindUI:Notify({
                     Title = "FXM脚本",
-                    Content = "监视玩家已开启 - 目标: " .. TargetPlayer.Name,
+                    Content = "监视玩家已开启 - 目标: " .. MonitorTarget.Name,
                     Duration = 3,
                 })
             else
@@ -3462,14 +3492,60 @@ local MonitorToggle = TabHandles.JBTY4:Toggle({
     end
 })
 
--- 循环把玩家传送过来功能（修正：使用 TabHandles.JBTY4）
+-- 更新监视状态
+spawn(function()
+    while true do
+        local status = MonitorTarget and MonitorTarget.Name or "未选择玩家"
+        MonitorStatus:SetContent(status)
+        wait(1)
+    end
+end)
+
+-- 分隔线
+TabHandles.JBTY4:SectionSeparator()
+
+-- ========== 拉取玩家功能 ==========
+local BringTarget = nil
+local BringLoop = false
+
+-- 拉取玩家输入框
+local BringInput = TabHandles.JBTY4:Input({
+    Title = "拉取玩家 - 输入玩家名字",
+    Placeholder = "输入要拉取的玩家",
+    Callback = function(InputText)
+        local player = FindPlayerByName(InputText)
+        if player then
+            BringTarget = player
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "拉取目标: " .. player.Name,
+                Duration = 3,
+            })
+        else
+            WindUI:Notify({
+                Title = "FXM脚本",
+                Content = "未找到玩家: " .. InputText,
+                Duration = 3,
+            })
+            BringTarget = nil
+        end
+    end
+})
+
+-- 拉取玩家状态显示
+local BringStatus = TabHandles.JBTY4:Label({
+    Title = "拉取玩家目标",
+    Content = "未选择玩家"
+})
+
+-- 拉取玩家开关
 local BringToggle = TabHandles.JBTY4:Toggle({
-    Title = "循环把玩家传送过来",
+    Title = "开启拉取玩家",
     Value = false, 
     Callback = function(Value)
         BringLoop = Value
         if Value then
-            if not TargetPlayer then
+            if not BringTarget then
                 WindUI:Notify({
                     Title = "FXM脚本",
                     Content = "请先输入玩家名字",
@@ -3480,23 +3556,18 @@ local BringToggle = TabHandles.JBTY4:Toggle({
             end
             WindUI:Notify({
                 Title = "FXM脚本",
-                Content = "循环拉玩家已开启 - 目标: " .. TargetPlayer.Name,
+                Content = "循环拉玩家已开启 - 目标: " .. BringTarget.Name,
                 Duration = 3,
             })
-            -- 拉玩家逻辑：传送到前面并背对着本人
+            -- 拉玩家逻辑
             spawn(function()
-                while BringLoop and TargetPlayer do
-                    local targetChar = TargetPlayer.Character
+                while BringLoop and BringTarget do
+                    local targetChar = BringTarget.Character
                     local localChar = LocalPlayer.Character
                     if targetChar and localChar and targetChar:FindFirstChild("HumanoidRootPart") and localChar:FindFirstChild("HumanoidRootPart") then
-                        -- 计算玩家前方的位置
                         local lookVector = localChar.HumanoidRootPart.CFrame.LookVector
                         local frontPosition = localChar.HumanoidRootPart.Position + lookVector * 5
-                        
-                        -- 计算让目标玩家背对着我们的方向
                         local oppositeLookVector = -lookVector
-                        
-                        -- 将目标玩家传送到前方位置，并让他背对着我们
                         targetChar.HumanoidRootPart.CFrame = CFrame.new(frontPosition, frontPosition + oppositeLookVector)
                     end
                     wait(0.1)
@@ -3512,10 +3583,22 @@ local BringToggle = TabHandles.JBTY4:Toggle({
     end
 })
 
--- 刷新玩家列表按钮（修正：使用 TabHandles.JBTY4）
+-- 更新拉取状态
+spawn(function()
+    while true do
+        local status = BringTarget and BringTarget.Name or "未选择玩家"
+        BringStatus:SetContent(status)
+        wait(1)
+    end
+end)
+
+-- 分隔线
+TabHandles.JBTY4:SectionSeparator()
+
+-- ========== 刷新玩家列表按钮 ==========
 local RefreshButton = TabHandles.JBTY4:Button({
     Title = "刷新玩家列表",
-    Desc = "显示当前在线玩家",
+    Desc = "显示当前所有在线玩家",
     Locked = false,
     Callback = function()
         local playerList = "当前在线玩家:\n"
@@ -3536,9 +3619,6 @@ local RefreshButton = TabHandles.JBTY4:Button({
         })
     end
 })
-
--- 分隔线（修正：使用 TabHandles.JBTY4）
-TabHandles.JBTY4:SectionSeparator()
 -----------------忍者传奇------------------
 local player = game.Players.LocalPlayer
 -- 初始化全局变量
