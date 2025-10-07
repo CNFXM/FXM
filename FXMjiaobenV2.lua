@@ -3307,6 +3307,7 @@ Toggle = TabHandles.JBTY3:Toggle({
     end
 })
 -----------------玩家区域------------------
+----------------玩家区域------------------
 -- 玩家列表和状态变量
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -3538,8 +3539,8 @@ local RefreshButton = Tabs.JBTY4:Button({
     end
 })
 
--- 分隔线
-Tabs.GGXX:SectionSeparator()
+-- 分隔线（修正：应该使用 JBTY4 而不是 GGXX）
+Tabs.JBTY4:SectionSeparator()
 -----------------忍者传奇------------------
 local player = game.Players.LocalPlayer
 -- 初始化全局变量
