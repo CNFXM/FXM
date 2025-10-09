@@ -28,7 +28,7 @@ function Ripple(obj)
 		Ripple.BackgroundColor3 = Color3.fromRGB(139, 0, 255)
 		Ripple.BackgroundTransparency = 1.000
 		Ripple.ZIndex = 8
-		Ripple.Image = "rbxassetid://131298529372722"
+		Ripple.Image = "rbxassetid://81944629903864"
 		Ripple.ImageTransparency = 0.800
 		Ripple.ScaleType = Enum.ScaleType.Fit
 		Ripple.ImageColor3 = Color3.fromRGB(139, 0, 255)
@@ -216,7 +216,7 @@ end
       DropShadow.BackgroundTransparency = 1.000
       DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
       DropShadow.Size = UDim2.new(1, 10, 1, 10)
-      DropShadow.Image = "rbxassetid://96490157548807" --背景
+      DropShadow.Image = "rbxassetid://115368719190352" --背景
       DropShadow.ImageColor3 = Color3.fromRGB(255,255,255)
       DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
@@ -452,10 +452,10 @@ Open.BorderSizePixel = 0
 Open.Size = UDim2.new(1, 0, 1, 0)
 Open.Active = true
 Open.Draggable = true
-Open.Image = "rbxassetid://131298529372722"
+Open.Image = "rbxassetid://81944629903864"
 Open.MouseButton1Click:Connect(function()
   Main.Visible = not Main.Visible
-  Open.Image = Main.Visible and "rbxassetid://106208288107908" or "rbxassetid://125013442356478" --开关的图
+  Open.Image = Main.Visible and "rbxassetid://73942828034736" or "rbxassetid://75035870595229" --开关的图
 end)
 
 UICorner_2.CornerRadius = UDim.new(0, 90)
@@ -484,7 +484,7 @@ UIG.Parent = Open
         TabIco.BackgroundTransparency = 1.000
         TabIco.BorderSizePixel = 0
         TabIco.Size = UDim2.new(0, 24, 0, 24)
-        TabIco.Image = "rbxassetid://131298529372722" or icon and "rbxassetid://"..icon
+        TabIco.Image = "rbxassetid://81944629903864" or icon and "rbxassetid://"..icon
         TabIco.ImageTransparency = 0.2
         
         TabText.Name = "TabText"
@@ -576,14 +576,14 @@ UIG.Parent = Open
           SectionOpen.BorderSizePixel = 0
           SectionOpen.Position = UDim2.new(0, -33, 0, 5)
           SectionOpen.Size = UDim2.new(0, 26, 0, 26)
-          SectionOpen.Image = "rbxassetid://131298529372722"
+          SectionOpen.Image = "rbxassetid://81944629903864"
           
           SectionOpened.Name = "SectionOpened"
           SectionOpened.Parent = SectionOpen
           SectionOpened.BackgroundTransparency = 1.000
           SectionOpened.BorderSizePixel = 0
           SectionOpened.Size = UDim2.new(0, 26, 0, 26)
-          SectionOpened.Image = "rbxassetid://131298529372722"
+          SectionOpened.Image = "rbxassetid://81944629903864"
           SectionOpened.ImageTransparency = 1.000
     
           SectionToggle.Name = "SectionToggle"
